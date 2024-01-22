@@ -110,7 +110,7 @@ struct JetDerivedDataProducerTask {
   }
   PROCESS_SWITCH(JetDerivedDataProducerTask, processMcCollisions, "produces derived MC collision table", false);
 
-  void processTracks(soa::Join<aod::Tracks, aod::TrackSelection>::iterator const& track)
+  void processTracks(soa::Join<aod::Tracks, aod::TracksExtra, aod::TrackSelection, aod::TrackSelectionExtension>::iterator const& track)
   {
     jTracksTable(track.collisionId(), track.pt(), track.eta(), track.phi(), jetderiveddatautilities::setTrackSelectionBit(track));
     jTracksParentIndexTable(track.globalIndex());

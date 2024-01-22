@@ -221,7 +221,10 @@ enum JTrackSel {
   trackSign = 0, // warning : this number is hardcoded in the sign coloumn in the JTracks table so should not be changed without changing it there too
   globalTrack = 1,
   qualityTrack = 2,
-  hybridTrack = 3
+  hybridTrack = 3,
+  AIMERICAntonFull = 4,
+  AIMERICGlobalTpcOptional = 5,
+  AIMERICIntermediary1bis = 6,
 };
 
 template <typename T>
@@ -250,6 +253,10 @@ int initialiseTrackSelection(std::string trackSelection)
     return JTrackSel::qualityTrack;
   } else if (trackSelection == "hybridTracksJE") {
     return JTrackSel::hybridTrack;
+  } else if (trackSelection == "AIMERICGlobalTpcOptional") {
+    return JTrackSel::AIMERICGlobalTpcOptional;
+  } else if (trackSelection == "AIMERICAntonFull") {
+    return JTrackSel::AIMERICAntonFull;
   }
   return -1;
 }
@@ -272,7 +279,27 @@ uint8_t setTrackSelectionBit(T const& track)
   if (track.trackCutFlagFb5()) {
     SETBIT(bit, JTrackSel::hybridTrack);
   }
+  //AIMERIC START
+  if (track.passedTrackType() && (track.passedDCAxy() && track.passedDCAz() && track.passedGoldenChi2()) && (track.passedITSNCls() && track.passedITSChi2NDF() && track.passedITSHits() && track.passedITSRefit()) && (!track.hasTPC() || (track.passedTPCNCls() && track.passedTPCChi2NDF() && track.passedTPCCrossedRowsOverNCls() && track.passedTPCCrossedRows() && track.passedTPCRefit()))) {
+    SETBIT(bit, JTrackSel::AIMERICGlobalTpcOptional); // optional TPC instead of mandatory
+  }
+  // if (track.passedTrackType() && (track.passedDCAxy() && track.passedDCAz())                             && (track.passedITSNCls() && track.passedITSChi2NDF() && track.passedITSHits())                           && (!track.hasTPC() || (track.passedTPCNCls() && track.passedTPCChi2NDF() && track.passedTPCCrossedRowsOverNCls()))) {
+  //   SETBIT(bit, JTrackSel::AIMERICIntermediary4); // Primary GolcenChi2 removed, it's only run 2 anyway but good check
+  // }
+  if (                           (track.passedDCAxy() && track.passedDCAz())                             && (track.passedITSNCls() && track.passedITSChi2NDF() && track.passedITSHits())                           && (!track.hasTPC() || (track.passedTPCNCls() && track.passedTPCChi2NDF() && track.passedTPCCrossedRowsOverNCls()))) {
+    SETBIT(bit, JTrackSel::AIMERICAntonFull); // TrackType removed compared to AIMERICIntermediary4
+  }
+  //AIMERIC END
 
+
+  // //AIMERIC START OBSOLETE
+  // if (track.isPrimaryTrack() && track.isInAcceptanceTrack() && track.isQualityTrackITS() && (track.isQualityTrackTPC() || !track.hasTPC())) {
+  //   SETBIT(bit, JTrackSel::AIMERICtestAntonSel1);
+  // }
+  // if (track.isPrimaryTrack() && track.isInAcceptanceTrack() && (track.passedITSNCls() && track.passedITSChi2NDF() && track.passedITSHits()) && (!track.hasTPC() || (track.passedTPCNCls() && track.passedTPCChi2NDF() && track.passedTPCCrossedRowsOverNCls()))) {
+  //   SETBIT(bit, JTrackSel::AIMERICtestAntonSel2);
+  // }
+  // //AIMERIC END OBSOLETE
   return bit;
 }
 

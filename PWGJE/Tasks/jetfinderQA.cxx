@@ -15,6 +15,7 @@
 
 #include <cmath>
 #include <TRandom3.h>
+#include <TMath.h>
 
 #include "Framework/ASoA.h"
 #include "Framework/AnalysisDataModel.h"
@@ -65,7 +66,10 @@ struct JetFinderQATask {
   Configurable<float> jetAreaFractionMin{"jetAreaFractionMin", -99.0, "used to make a cut on the jet areas"};
   Configurable<float> leadingConstituentPtMin{"leadingConstituentPtMin", -99.0, "minimum pT selection on jet constituent"};
   Configurable<float> randomConeR{"randomConeR", 0.4, "size of random Cone for estimating background fluctuations"};
-
+  Configurable<float> jetAreaCutFactor{"jetAreaCutFactor", 0.6, "factor involved in the minimum jet area cut"};
+  Configurable<float> leadingTrackCutDataMin{"leadingTrackCutDataMin", 5., "minimum leading track pt for a jet"};
+  Configurable<float> leadingTrackCutDataMax{"leadingTrackCutDataMax", 999., "maximum leading track pt for a jet"};
+  
   std::vector<bool> filledJetR_Both;
   std::vector<bool> filledJetR_Low;
   std::vector<bool> filledJetR_High;
@@ -163,6 +167,7 @@ struct JetFinderQATask {
       registry.add("h2_ntracks_rhom", "; N_{tracks}; #it{rho}_{m} (GeV/area);", {HistType::kTH2F, {{10000, 0.0, 10000.0}, {100, 0.0, 100.0}}});
       registry.add("h2_centrality_rho", "; centrality; #it{rho} (GeV/area);", {HistType::kTH2F, {{1100, 0., 110.}, {400, 0., 400.0}}});
       registry.add("h2_centrality_rhom", ";centrality; #it{rho}_{m} (GeV/area)", {HistType::kTH2F, {{1100, 0., 110.}, {100, 0., 100.0}}});
+      registry.add("h2_leadingjetpt_rho", "; #it{p}_{T,leading jet}; #it{rho} (GeV/area);", {HistType::kTH2F, {{400, -100., 300.}, {400, 0.0, 400.0}}});
     }
 
     if (doprocessRandomCone) {
@@ -317,6 +322,16 @@ struct JetFinderQATask {
       return;
     }
 
+    float leadingTrackPt = 0;
+    for (auto& constituent : jet.template tracks_as<JetTracks>()) {
+      if (constituent.pt() > leadingTrackPt) {
+        leadingTrackPt = constituent.pt();
+      }
+    }
+    if (!(leadingTrackCutDataMin < leadingTrackPt && leadingTrackPt < leadingTrackCutDataMax)) {
+      return;
+    }
+
     if (jet.r() == round(selectedJetsRadius * 100.0f)) {
       registry.fill(HIST("h_jet_pt"), jet.pt(), weight);
       registry.fill(HIST("h_jet_eta"), jet.eta(), weight);
@@ -346,6 +361,16 @@ struct JetFinderQATask {
   template <typename T>
   void fillRhoAreaSubtractedHistograms(T const& jet, float centrality, float rho, float weight = 1.0)
   {
+    float leadingTrackPt = 0;
+    for (auto& constituent : jet.template tracks_as<JetTracks>()) {
+      if (constituent.pt() > leadingTrackPt) {
+        leadingTrackPt = constituent.pt();
+      }
+    }
+    if (!(leadingTrackCutDataMin < leadingTrackPt && leadingTrackPt < leadingTrackCutDataMax)) {
+      return;
+    }
+
     if (jet.r() == round(selectedJetsRadius * 100.0f)) {
       registry.fill(HIST("h_jet_pt_rhoareasubtracted"), jet.pt() - (rho * jet.area()), weight);
       registry.fill(HIST("h_jet_eta_rhoareasubtracted"), jet.eta(), weight);
@@ -376,8 +401,57 @@ struct JetFinderQATask {
   }
 
   template <typename T>
+  void fillRhoAreaSubtractedAndAreaCutHistograms(T const& jet, float centrality, float rho, float weight = 1.0)
+  {
+    float leadingTrackPt = 0;
+    for (auto& constituent : jet.template tracks_as<JetTracks>()) {
+      if (constituent.pt() > leadingTrackPt) {
+        leadingTrackPt = constituent.pt();
+      }
+    }
+    if (!(leadingTrackCutDataMin < leadingTrackPt && leadingTrackPt < leadingTrackCutDataMax)) {
+      return;
+    }
+
+    if (jet.area() > jetAreaCutFactor * TMath::Pi() * pow(jet.r() / 100.0, 2)) {
+      if (jet.r() == round(selectedJetsRadius * 100.0f)) {
+        registry.fill(HIST("h_jet_pt_rhoareasubtracted_areacut"), jet.pt() - (rho * jet.area()), weight);
+        registry.fill(HIST("h_jet_eta_rhoareasubtracted_areacut"), jet.eta(), weight);
+        registry.fill(HIST("h_jet_phi_rhoareasubtracted_areacut"), jet.phi(), weight);
+        registry.fill(HIST("h_jet_ntracks_rhoareasubtracted_areacut"), jet.tracks().size(), weight);
+        registry.fill(HIST("h2_centrality_jet_pt_rhoareasubtracted_areacut"), centrality, jet.pt() - (rho * jet.area()), weight);
+      }
+
+      registry.fill(HIST("h3_jet_r_jet_pt_centrality_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.pt() - (rho * jet.area()), centrality, weight);
+      registry.fill(HIST("h3_jet_r_jet_pt_jet_eta_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.pt() - (rho * jet.area()), jet.eta(), weight);
+      registry.fill(HIST("h3_jet_r_jet_pt_jet_phi_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.pt() - (rho * jet.area()), jet.phi(), weight);
+      registry.fill(HIST("h3_jet_r_jet_eta_jet_phi_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.eta(), jet.phi(), weight);
+      registry.fill(HIST("h3_jet_r_jet_pt_jet_ntracks_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.pt() - (rho * jet.area()), jet.tracks().size(), weight);
+      registry.fill(HIST("h3_jet_r_jet_pt_jet_area_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.pt() - (rho * jet.area()), jet.area(), weight);
+      registry.fill(HIST("h3_jet_r_jet_pt_jet_pt_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.pt(), jet.pt() - (rho * jet.area()), weight);
+
+      for (auto& constituent : jet.template tracks_as<JetTracks>()) {
+
+        registry.fill(HIST("h3_jet_r_jet_pt_track_pt_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.pt() - (rho * jet.area()), constituent.pt(), weight);
+        registry.fill(HIST("h3_jet_r_jet_pt_track_eta_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.pt() - (rho * jet.area()), constituent.eta(), weight);
+        registry.fill(HIST("h3_jet_r_jet_pt_track_phi_rhoareasubtracted_areacut"), jet.r() / 100.0, jet.pt() - (rho * jet.area()), constituent.phi(), weight);
+      }
+    }
+  }
+
+  template <typename T>
   void fillEventWiseConstituentSubtractedHistograms(T const& jet, float centrality, float weight = 1.0)
   {
+    float leadingTrackPt = 0;
+    for (auto& constituent : jet.template tracks_as<JetTracks>()) {
+      if (constituent.pt() > leadingTrackPt) {
+        leadingTrackPt = constituent.pt();
+      }
+    }
+    if (!(leadingTrackCutDataMin < leadingTrackPt && leadingTrackPt < leadingTrackCutDataMax)) {
+      return;
+    }
+
     if (jet.r() == round(selectedJetsRadius * 100.0f)) {
       registry.fill(HIST("h_jet_pt_eventwiseconstituentsubtracted"), jet.pt(), weight);
       registry.fill(HIST("h_jet_eta_eventwiseconstituentsubtracted"), jet.eta(), weight);
@@ -860,7 +934,7 @@ struct JetFinderQATask {
   }
   PROCESS_SWITCH(JetFinderQATask, processTracksSub, "QA for charged event-wise embedded subtracted tracks", false);
 
-  void processRho(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Filtered<JetTracks> const& tracks)
+  void processRho(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Filtered<JetTracks> const& tracks, soa::Join<aod::ChargedJets, aod::ChargedJetConstituents> const& jets)
   {
     int nTracks = 0;
     for (auto const& track : tracks) {
@@ -873,6 +947,14 @@ struct JetFinderQATask {
     registry.fill(HIST("h2_ntracks_rhom"), nTracks, collision.rhoM());
     registry.fill(HIST("h2_centrality_rho"), collision.centrality(), collision.rho());
     registry.fill(HIST("h2_centrality_rhom"), collision.centrality(), collision.rhoM());
+
+    float leadingJetPt = 0;
+    for (auto& jet : jets) {
+      if (jet.pt() > leadingJetPt) {
+        leadingJetPt = jet.pt();
+      }
+    }
+    registry.fill(HIST("h2_leadingjetpt_rho"), leadingJetPt, collision.rho());
   }
   PROCESS_SWITCH(JetFinderQATask, processRho, "QA for rho-area subtracted jets", false);
 
