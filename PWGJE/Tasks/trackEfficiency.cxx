@@ -71,7 +71,7 @@ struct TrackEfficiencyJets {
     }
     for (auto& mcparticle : mcparticles) {
       registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
-      for (auto& track : mcparticle.tracks_as<JetTracks>()) {
+      for (auto& track : mcparticle.tracks_as<JetTracksMCD>()) {
         if (!jetderiveddatautilities::selectCollision(track.collision(), eventSelection)) {
           continue;
         }
