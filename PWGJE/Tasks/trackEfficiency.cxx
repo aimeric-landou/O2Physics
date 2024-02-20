@@ -82,7 +82,7 @@ struct TrackEfficiencyJets {
       if (!track.has_mcParticle()) {
         continue;
       }
-      registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrack"), track.pt(), track.eta(), track.phi());
+      registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrack"), track.mcparticle_as<JetParticles>().pt(), track.mcparticle_as<JetParticles>().eta(), track.mcparticle_as<JetParticles>().phi());
     }
     
   }
