@@ -71,7 +71,7 @@ struct TrackEfficiencyJets {
   {
     
     if (!(mccollision.posZ() < 10.)) {
-    continue;
+      return;
     }
     for (auto& mcparticle : mcparticles) {
       registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
