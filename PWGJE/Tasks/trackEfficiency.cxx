@@ -46,7 +46,11 @@ struct TrackEfficiencyJets {
 
   HistogramRegistry registry;
 
-  Configurable<float> selectedJetsRadius{"selectedJetsRadius", 0.4, "resolution parameter for histograms without radius"};
+  Configurable<std::string> eventSelections{"eventSelections", "sel8", "choose event selection"};
+  Configurable<std::string> trackSelections{"trackSelections", "globalTracks", "set track selections"};
+
+  int eventSelection = -1;
+  int trackSelection = -1;
 
   void init(o2::framework::InitContext&)
   {
