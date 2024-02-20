@@ -63,7 +63,7 @@ struct TrackEfficiencyJets {
 
   void processTracks(JetMcCollisions::iterator const& mccollision, 
                      JetParticles const& mcparticles,
-                     JetTracks const& tracks)
+                     soa::Join<JetTracks, JMcTrackLbs> const& tracks)
   {
     
     if (!(mccollision.posZ() < 10.)) {
