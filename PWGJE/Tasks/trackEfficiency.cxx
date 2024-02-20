@@ -65,7 +65,7 @@ struct TrackEfficiencyJets {
     }
   }
 
-  void processTracks(JetMcCollision::iterator const& mccollision, 
+  void processTracks(JetMcCollisions::iterator const& mccollision, 
                      JetParticles const& mcparticles,
                      JetTracks const& tracks)
   {
