@@ -57,16 +57,8 @@ struct TrackEfficiencyJets {
     eventSelection = jetderiveddatautilities::initialiseEventSelection(static_cast<std::string>(eventSelections));
     trackSelection = jetderiveddatautilities::initialiseTrackSelection(static_cast<std::string>(trackSelections));
 
-    for (std::size_t iJetRadius = 0; iJetRadius < jetRadiiValues.size(); iJetRadius++) {
-        filledJetR_Both.push_back(0.0);
-        filledJetR_Low.push_back(0.0);
-        filledJetR_High.push_back(0.0);
-    }
-
-    if (doprocessJetsData || doprocessJetsMCD || doprocessJetsMCDWeighted) {
-        registry.add("h3_track_pt_track_eta_track_phi_mcparticles", "#it{p}_{T, mcpart} (GeV/#it{c}); #eta_{mcpart}; #phi_{mcpart}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
-        registry.add("h3_track_pt_track_eta_track_phi_associatedtrack", "#it{p}_{T, associatedTrack} (GeV/#it{c}); #eta_{associatedTrack}; #phi_{associatedTrack}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
-    }
+    registry.add("h3_track_pt_track_eta_track_phi_mcparticles", "#it{p}_{T, mcpart} (GeV/#it{c}); #eta_{mcpart}; #phi_{mcpart}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
+    registry.add("h3_track_pt_track_eta_track_phi_associatedtrack", "#it{p}_{T, associatedTrack} (GeV/#it{c}); #eta_{associatedTrack}; #phi_{associatedTrack}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
   }
 
   void processTracks(JetMcCollisions::iterator const& mccollision, 
@@ -80,8 +72,11 @@ struct TrackEfficiencyJets {
     for (auto& mcparticle : mcparticles) {
       registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
       for (auto& track : mcparticle.tracks_as<JetTracks>()) {
+        if (!jetderiveddatautilities::selectCollision(track.collision(), eventSelection)) {
+          continue;
+        }
         if (!jetderiveddatautilities::selectTrack(track, trackSelection)) {
-        continue;
+          continue;
         }
         registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrack"), track.pt(), track.eta(), track.phi());
       }
