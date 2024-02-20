@@ -71,16 +71,20 @@ struct TrackEfficiencyJets {
     }
     for (auto& mcparticle : mcparticles) {
       registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
-      for (auto& track : mcparticle.tracks_as<JetTracksMCD>()) {
-        if (!jetderiveddatautilities::selectCollision(track.collision(), eventSelection)) {
-          continue;
-        }
-        if (!jetderiveddatautilities::selectTrack(track, trackSelection)) {
-          continue;
-        }
-        registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrack"), track.pt(), track.eta(), track.phi());
-      }
     }
+    for (auto& track : tracks) {
+      if (!jetderiveddatautilities::selectCollision(track.collision(), eventSelection)) {
+        continue;
+      }
+      if (!jetderiveddatautilities::selectTrack(track, trackSelection)) {
+        continue;
+      }
+      if (!track.has_mcParticle()) {
+        continue;
+      }
+      registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrack"), track.pt(), track.eta(), track.phi());
+    }
+    
   }
 };
 
