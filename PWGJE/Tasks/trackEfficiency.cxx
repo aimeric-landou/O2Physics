@@ -61,7 +61,7 @@ struct TrackEfficiencyJets {
     registry.add("h3_track_pt_track_eta_track_phi_associatedtrack", "#it{p}_{T, associatedTrack} (GeV/#it{c}); #eta_{associatedTrack}; #phi_{associatedTrack}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
   }
 
-  void processTracks(JetMcCollision const& mccollision, 
+  void process(JetMcCollision const& mccollision, 
                      JetParticles const& mcparticles,
                      JetTracksMCD const& tracks)
   {
