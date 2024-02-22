@@ -264,7 +264,7 @@ struct JetFinderQATask {
       registry.add("h_collisions", "event status;event status;entries", {HistType::kTH1F, {{4, 0.0, 4.0}}});
       registry.add("h_centrality_collisions", "centrality vs collisions; centrality, collisions", {HistType::kTH2F, {{1200, -10.0, 110.0}, {4, 0.0, 4.0}}});
       registry.add("h_track_pt", "track pT;#it{p}_{T,track} (GeV/#it{c});entries", {HistType::kTH1F, {{200, 0., 200.}}});
-      registry.add("h_track_pt_track_eta_track_phi", "#it{p}_{T,track} (GeV/#it{c}); #eta_{track}; #varphi_{track}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
+      registry.add("h_track_pt_track_eta_track_phi", "#it{p}_{T,track} (GeV/#it{c}); #eta_{track}; #varphi_{track}", {HistType::kTH3F, {{400, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
       registry.add("h_track_eta", "track #eta;#eta_{track};entries", {HistType::kTH1F, {{100, -1.0, 1.0}}});
       registry.add("h_track_phi", "track #varphi;#varphi_{track};entries", {HistType::kTH1F, {{160, -1.0, 7.}}});
       registry.add("h_track_energy", "track energy;Energy GeV ;entries", {HistType::kTH1F, {{100, 0.0, 100.0}}});
