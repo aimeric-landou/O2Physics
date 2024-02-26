@@ -59,6 +59,7 @@ struct TrackEfficiencyJets {
 
     registry.add("h3_track_pt_track_eta_track_phi_mcparticles", "#it{p}_{T, mcpart} (GeV/#it{c}); #eta_{mcpart}; #phi_{mcpart}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
     registry.add("h3_track_pt_track_eta_track_phi_associatedtrack", "#it{p}_{T, associatedTrack} (GeV/#it{c}); #eta_{associatedTrack}; #phi_{associatedTrack}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
+    registry.add("h3_track_pt_track_eta_track_phi_mcparticles_trackable", "#it{p}_{T, trackableParticle} (GeV/#it{c}); #eta_{trackableParticle}; #phi_{trackableParticle}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
   }
 
   void process(JetMcCollision const& mccollision, 
@@ -71,6 +72,9 @@ struct TrackEfficiencyJets {
     }
     for (auto& mcparticle : mcparticles) {
       registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
+      if (mcparticle.isTrackable) { // to be defined by me
+        registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
+      }
     }
     for (auto& track : tracks) {
       if (!jetderiveddatautilities::selectCollision(track.collision(), eventSelection)) {

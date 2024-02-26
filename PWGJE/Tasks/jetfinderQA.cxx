@@ -954,9 +954,11 @@ struct JetFinderQATask {
     for (auto& jet : jets) {
       if (jet.pt() > leadingJetPt) {
         leadingJetPt = jet.pt();
+        leadingJetPt_rhoareasubtracted = jet.pt() - (collision.rho() * jet.area());
       }
     }
     registry.fill(HIST("h2_leadingjetpt_rho"), leadingJetPt, collision.rho());
+    registry.fill(HIST("h2_leadingjetpt_rhoareasubtracted_rho"), leadingJetPt, collision.rho());
   }
   PROCESS_SWITCH(JetFinderQATask, processRho, "QA for rho-area subtracted jets", false);
 
