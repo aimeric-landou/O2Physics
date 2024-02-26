@@ -951,6 +951,7 @@ struct JetFinderQATask {
     registry.fill(HIST("h2_centrality_rhom"), collision.centrality(), collision.rhoM());
 
     float leadingJetPt = 0;
+    float leadingJetPt_rhoareasubtracted = 0;
     for (auto& jet : jets) {
       if (jet.pt() > leadingJetPt) {
         leadingJetPt = jet.pt();
