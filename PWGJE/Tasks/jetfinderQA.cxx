@@ -959,7 +959,7 @@ struct JetFinderQATask {
       }
     }
     registry.fill(HIST("h2_leadingjetpt_rho"), leadingJetPt, collision.rho());
-    registry.fill(HIST("h2_leadingjetpt_rhoareasubtracted_rho"), leadingJetPt, collision.rho());
+    registry.fill(HIST("h2_leadingjetpt_rhoareasubtracted_rho"), leadingJetPt_rhoareasubtracted, collision.rho());
   }
   PROCESS_SWITCH(JetFinderQATask, processRho, "QA for rho-area subtracted jets", false);
 
