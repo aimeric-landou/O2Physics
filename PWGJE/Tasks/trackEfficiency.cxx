@@ -96,12 +96,12 @@ WorkflowSpec defineDataProcessing(ConfigContext const& cfgc) { return WorkflowSp
 
 
 
-trackable for tracks:
-    int firstLayerActive = track.itsClusterMap() & (1 << 0);
-    int secondLayerActive = track.itsClusterMap() & (1 << 1);
-    int thirdLayerActive = track.itsClusterMap() & (1 << 2);
-    int fourthLayerActive = track.itsClusterMap() & (1 << 3);
-    int fifthLayerActive = track.itsClusterMap() & (1 << 4);
-    int sixthLayerActive = track.itsClusterMap() & (1 << 5);
-    int seventhLayerActive = track.itsClusterMap() & (1 << 6);
-sadly I kinda need this for particles
+// trackable for tracks:
+//     int firstLayerActive = track.itsClusterMap() & (1 << 0);
+//     int secondLayerActive = track.itsClusterMap() & (1 << 1);
+//     int thirdLayerActive = track.itsClusterMap() & (1 << 2);
+//     int fourthLayerActive = track.itsClusterMap() & (1 << 3);
+//     int fifthLayerActive = track.itsClusterMap() & (1 << 4);
+//     int sixthLayerActive = track.itsClusterMap() & (1 << 5);
+//     int seventhLayerActive = track.itsClusterMap() & (1 << 6);
+// sadly I kinda need this for particles
