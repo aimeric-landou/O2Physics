@@ -62,9 +62,12 @@ struct TrackEfficiencyJets {
     registry.add("h3_track_pt_track_eta_track_phi_mcparticles_trackable", "#it{p}_{T, trackableParticle} (GeV/#it{c}); #eta_{trackableParticle}; #phi_{trackableParticle}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
   }
 
+  Preslice<JetTracksMCD> perCollision = aod::track::collisionId;
+
   void process(JetMcCollision const& mccollision, 
-                     JetParticles const& mcparticles,
-                     JetTracksMCD const& tracks)
+              soa::SmallGroups<JetCollisionsMCD> const& collisions //smallgroups gives only the collisions associated to the current mccollision, thanks to the mccollisionlabel pre-integrated in jetcollisionsmcd
+              JetParticles const& mcparticles,
+              JetTracksMCD const& tracks)
   {
     
     if (!(mccollision.posZ() < 10.)) {
@@ -76,19 +79,21 @@ struct TrackEfficiencyJets {
       //   registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
       // }
     }
-    for (auto& track : tracks) {
-      if (!jetderiveddatautilities::selectCollision(track.collision(), eventSelection)) {
+    for (auto& collision : collisions){
+      if (!jetderiveddatautilities::selectCollision(collision, eventSelection)) {
         continue;
       }
-      if (!jetderiveddatautilities::selectTrack(track, trackSelection)) { // might need to ask for track falling in eta, because in the histogram we only hve eta and phi of teh mcparticle
-        continue;
+      auto collTracks = tracks.sliceBy(perCollision, collision.globalIndex());
+      for (auto& track : collTracks) {
+        if (!jetderiveddatautilities::selectTrack(track, trackSelection)) { // might need to ask for track falling in eta, because in the histogram we only hve eta and phi of teh mcparticle
+          continue;
+        }
+        if (!track.has_mcParticle()) {
+          continue;
+        }
+        registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrack"), track.mcParticle_as<JetParticles>().pt(), track.mcParticle_as<JetParticles>().eta(), track.mcParticle_as<JetParticles>().phi());
       }
-      if (!track.has_mcParticle()) {
-        continue;
-      }
-      registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrack"), track.mcParticle_as<JetParticles>().pt(), track.mcParticle_as<JetParticles>().eta(), track.mcParticle_as<JetParticles>().phi());
     }
-    
   }
 };
 
