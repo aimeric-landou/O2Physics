@@ -62,7 +62,8 @@ struct TrackEfficiencyJets {
     registry.add("h3_track_pt_track_eta_track_phi_mcparticles_trackable", "#it{p}_{T, trackableParticle} (GeV/#it{c}); #eta_{trackableParticle}; #phi_{trackableParticle}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
   }
 
-  Preslice<JetTracksMCD> perCollision = jtrack::JCollisionId;
+  Preslice<JetTracksMCD> tracksPerCollision = jtrack::JCollisionId;
+  // Preslice<soa::Join<aod::JTracks, aod::JTrackPIs, aod::JMcTrackLbs>> tracksPerCollision = aod::jtrack::collisionId;
 
   void process(JetMcCollision const& mccollision, 
               soa::SmallGroups<JetCollisionsMCD> const& collisions, //smallgroups gives only the collisions associated to the current mccollision, thanks to the mccollisionlabel pre-integrated in jetcollisionsmcd
@@ -83,7 +84,7 @@ struct TrackEfficiencyJets {
       if (!jetderiveddatautilities::selectCollision(collision, eventSelection)) {
         continue;
       }
-      auto collTracks = tracks.sliceBy(perCollision, collision.globalIndex());
+      auto collTracks = tracks.sliceBy(tracksPerCollision, collision.globalIndex());
       for (auto& track : collTracks) {
         if (!jetderiveddatautilities::selectTrack(track, trackSelection)) { // might need to ask for track falling in eta, because in the histogram we only hve eta and phi of teh mcparticle
           continue;
