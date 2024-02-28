@@ -62,7 +62,7 @@ struct TrackEfficiencyJets {
     registry.add("h3_track_pt_track_eta_track_phi_mcparticles_trackable", "#it{p}_{T, trackableParticle} (GeV/#it{c}); #eta_{trackableParticle}; #phi_{trackableParticle}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
   }
 
-  Preslice<JetTracksMCD> tracksPerCollision = jtrack::JCollisionId;
+  Preslice<JetTracksMCD> tracksPerCollision = aod::jtrack::JCollisionId;
   // Preslice<soa::Join<aod::JTracks, aod::JTrackPIs, aod::JMcTrackLbs>> tracksPerCollision = aod::jtrack::collisionId;
 
   void process(JetMcCollision const& mccollision, 
