@@ -65,7 +65,7 @@ struct TrackEfficiencyJets {
   Preslice<JetTracksMCD> perCollision = aod::track::collisionId;
 
   void process(JetMcCollision const& mccollision, 
-              soa::SmallGroups<JetCollisionsMCD> const& collisions //smallgroups gives only the collisions associated to the current mccollision, thanks to the mccollisionlabel pre-integrated in jetcollisionsmcd
+              soa::SmallGroups<JetCollisionsMCD> const& collisions, //smallgroups gives only the collisions associated to the current mccollision, thanks to the mccollisionlabel pre-integrated in jetcollisionsmcd
               JetParticles const& mcparticles,
               JetTracksMCD const& tracks)
   {
