@@ -58,7 +58,8 @@ struct TrackEfficiencyJets {
     trackSelection = jetderiveddatautilities::initialiseTrackSelection(static_cast<std::string>(trackSelections));
 
     registry.add("h3_track_pt_track_eta_track_phi_mcparticles", "#it{p}_{T, mcpart} (GeV/#it{c}); #eta_{mcpart}; #phi_{mcpart}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
-    registry.add("h3_track_pt_track_eta_track_phi_associatedtrack", "#it{p}_{T, associatedTrack} (GeV/#it{c}); #eta_{associatedTrack}; #phi_{associatedTrack}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
+    registry.add("h3_track_pt_track_eta_track_phi_associatedtrackSelColl", "#it{p}_{T, associatedTrack} (GeV/#it{c}); #eta_{associatedTrack}; #phi_{associatedTrack}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
+    registry.add("h3_track_pt_track_eta_track_phi_associatedtrackNonSelColl", "#it{p}_{T, associatedTrack} (GeV/#it{c}); #eta_{associatedTrack}; #phi_{associatedTrack}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
     registry.add("h3_track_pt_track_eta_track_phi_mcparticles_trackable", "#it{p}_{T, trackableParticle} (GeV/#it{c}); #eta_{trackableParticle}; #phi_{trackableParticle}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
   }
 
@@ -74,16 +75,19 @@ struct TrackEfficiencyJets {
     if (!(mccollision.posZ() < 10.)) {
       return;
     }
+    if (collisions.size() < 1) { // Skipping MC events that have no reconstructed collisions
+      return;
+    }
+
     for (auto& mcparticle : mcparticles) {
+      // if (mcParticle.isPhysicalPrimary()); // if I only want primaries
       registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
       // if (mcparticle.isTrackable) { // to be defined by me
       //   registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
       // }
+      // if 
     }
     for (auto& collision : collisions){
-      if (!jetderiveddatautilities::selectCollision(collision, eventSelection)) {
-        continue;
-      }
       auto collTracks = tracks.sliceBy(tracksPerCollision, collision.globalIndex());
       for (auto& track : collTracks) {
         if (!jetderiveddatautilities::selectTrack(track, trackSelection)) { // might need to ask for track falling in eta, because in the histogram we only hve eta and phi of teh mcparticle
@@ -92,7 +96,12 @@ struct TrackEfficiencyJets {
         if (!track.has_mcParticle()) {
           continue;
         }
-        registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrack"), track.mcParticle_as<JetParticles>().pt(), track.mcParticle_as<JetParticles>().eta(), track.mcParticle_as<JetParticles>().phi());
+
+        if (!jetderiveddatautilities::selectCollision(collision, eventSelection)) {
+          registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrackNonSelColl"), track.mcParticle_as<JetParticles>().pt(), track.mcParticle_as<JetParticles>().eta(), track.mcParticle_as<JetParticles>().phi());
+        } else {
+          registry.fill(HIST("h3_track_pt_track_eta_track_phi_associatedtrackSelColl"), track.mcParticle_as<JetParticles>().pt(), track.mcParticle_as<JetParticles>().eta(), track.mcParticle_as<JetParticles>().phi());
+        }
       }
     }
   }
