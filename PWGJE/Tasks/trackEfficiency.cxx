@@ -43,6 +43,10 @@ using namespace o2::framework;
 using namespace o2::framework::expressions;
 
 struct TrackEfficiencyJets {
+  Service<o2::framework::O2DatabasePDG> pdg;
+
+  Preslice<JetTracksMCD> tracksPerCollision = aod::jtrack::collisionId;
+  // Preslice<soa::Join<aod::JTracks, aod::JTrackPIs, aod::JMcTrackLbs>> tracksPerCollision = aod::jtrack::collisionId;
 
   HistogramRegistry registry;
 
@@ -63,7 +67,7 @@ struct TrackEfficiencyJets {
     }
     return std::abs(charge) >= 3.;
   }
-  
+
   void init(o2::framework::InitContext&)
   {
     eventSelection = jetderiveddatautilities::initialiseEventSelection(static_cast<std::string>(eventSelections));
@@ -74,9 +78,6 @@ struct TrackEfficiencyJets {
     registry.add("h3_track_pt_track_eta_track_phi_associatedtrackNonSelColl", "#it{p}_{T, associatedTrack} (GeV/#it{c}); #eta_{associatedTrack}; #phi_{associatedTrack}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
     registry.add("h3_track_pt_track_eta_track_phi_mcparticles_trackable", "#it{p}_{T, trackableParticle} (GeV/#it{c}); #eta_{trackableParticle}; #phi_{trackableParticle}", {HistType::kTH3F, {{200, 0., 200.}, {100, -1.0, 1.0}, {160, -1.0, 7.}}});
   }
-
-  Preslice<JetTracksMCD> tracksPerCollision = aod::jtrack::collisionId;
-  // Preslice<soa::Join<aod::JTracks, aod::JTrackPIs, aod::JMcTrackLbs>> tracksPerCollision = aod::jtrack::collisionId;
 
   void process(JetMcCollision const& mccollision, 
               soa::SmallGroups<JetCollisionsMCD> const& collisions, //smallgroups gives only the collisions associated to the current mccollision, thanks to the mccollisionlabel pre-integrated in jetcollisionsmcd
