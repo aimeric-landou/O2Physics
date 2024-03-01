@@ -168,6 +168,7 @@ struct JetFinderQATask {
       registry.add("h2_centrality_rho", "; centrality; #it{rho} (GeV/area);", {HistType::kTH2F, {{1100, 0., 110.}, {400, 0., 400.0}}});
       registry.add("h2_centrality_rhom", ";centrality; #it{rho}_{m} (GeV/area)", {HistType::kTH2F, {{1100, 0., 110.}, {100, 0., 100.0}}});
       registry.add("h2_leadingjetpt_rho", "; #it{p}_{T,leading jet}; #it{rho} (GeV/area);", {HistType::kTH2F, {{400, -100., 300.}, {400, 0.0, 400.0}}});
+      registry.add("h2_leadingjetpt_rhoareasubtracted_rho", "; #it{p}_{T,leading jet}; #it{rho} (GeV/area);", {HistType::kTH2F, {{400, -100., 300.}, {400, 0.0, 400.0}}});
     }
 
     if (doprocessRandomCone) {
