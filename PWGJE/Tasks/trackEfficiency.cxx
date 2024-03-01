@@ -85,6 +85,9 @@ struct TrackEfficiencyJets {
       if (!(abs(mcparticle.eta()) < etaAcceptance)) {
         continue;
       }
+      if (!isChargedParticle(mcparticle.pdgCode())) {
+        continue;
+      }
       registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
       // if (mcparticle.isTrackable) { // to be defined by me
       //   registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
