@@ -48,7 +48,7 @@ struct TrackEfficiencyJets {
 
   Configurable<std::string> eventSelections{"eventSelections", "sel8", "choose event selection"};
   Configurable<std::string> trackSelections{"trackSelections", "globalTracks", "set track selections"};
-  Configurable<std::double> etaAcceptance{"etaAcceptance", 0.9, "eta acceptance; would be good to draw it from the tracksel automatically"};
+  Configurable<double> etaAcceptance{"etaAcceptance", 0.9, "eta acceptance; would be good to draw it from the tracksel automatically"};
 
   int eventSelection = -1;
   int trackSelection = -1;
