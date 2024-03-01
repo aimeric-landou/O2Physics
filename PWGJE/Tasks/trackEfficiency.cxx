@@ -48,6 +48,7 @@ struct TrackEfficiencyJets {
 
   Configurable<std::string> eventSelections{"eventSelections", "sel8", "choose event selection"};
   Configurable<std::string> trackSelections{"trackSelections", "globalTracks", "set track selections"};
+  Configurable<std::double> etaAcceptance{"etaAcceptance", 0.9, "eta acceptance; would be good to draw it from the tracksel automatically"};
 
   int eventSelection = -1;
   int trackSelection = -1;
@@ -81,6 +82,9 @@ struct TrackEfficiencyJets {
 
     for (auto& mcparticle : mcparticles) {
       // if (mcParticle.isPhysicalPrimary()); // if I only want primaries
+      if (!(abs(mcparticle.eta()) < etaAcceptance)) {
+        continue;
+      }
       registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
       // if (mcparticle.isTrackable) { // to be defined by me
       //   registry.fill(HIST("h3_track_pt_track_eta_track_phi_mcparticles"), mcparticle.pt(), mcparticle.eta(), mcparticle.phi());
