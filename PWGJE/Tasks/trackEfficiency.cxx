@@ -53,6 +53,17 @@ struct TrackEfficiencyJets {
   int eventSelection = -1;
   int trackSelection = -1;
 
+
+  bool isChargedParticle(int code)
+  {
+    auto p = pdg->GetParticle(code);
+    auto charge = 0.;
+    if (p != nullptr) {
+      charge = p->Charge();
+    }
+    return std::abs(charge) >= 3.;
+  }
+  
   void init(o2::framework::InitContext&)
   {
     eventSelection = jetderiveddatautilities::initialiseEventSelection(static_cast<std::string>(eventSelections));
