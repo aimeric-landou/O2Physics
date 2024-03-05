@@ -964,12 +964,12 @@ struct JetFinderQATask {
   }
   PROCESS_SWITCH(JetFinderQATask, processRho, "QA for rho-area subtracted jets", false);
 
-  void processRandomCone(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Join<aod::ChargedEventWiseSubtractedJets, aod::ChargedEventWiseSubtractedJetConstituents> const& jets, JetTracksSub const& tracks)
+  void processRandomCone(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Join<aod::ChargedEventWiseSubtractedets, aod::ChargedEventWiseSubtractedJetConstituents> const& jets, JetTracksSub const& tracks)
   // void processRandomCone(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Join<aod::ChargedJets, aod::ChargedJetConstituents> const& jets, JetTracks const& tracks)
   {
-    if (jets.size()==0){
-      return;
-    }
+    // if (jets.size()==0){
+    //   return;
+    // }
     
     TRandom3 randomNumber(0);
     float randomConeEta = randomNumber.Uniform(trackEtaMin + randomConeR, trackEtaMax - randomConeR);
@@ -989,6 +989,10 @@ struct JetFinderQATask {
 
     float dPhiLeadingJet = RecoDecay::constrainAngle(jets.iteratorAt(0).phi() - randomConePhi, static_cast<float>(-M_PI));
     float dEtaLeadingJet = jets.iteratorAt(0).eta() - randomConeEta;
+
+    LOGF(info, "------------------- jets.iteratorAt(0).phi() = %f", jets.iteratorAt(0).phi()); // shows fine
+    LOGF(info, "------------------- jets.iteratorAt(0).eta() = %f", jets.iteratorAt(0).eta()); // shows fine
+    LOGF(info, "------------------- jets.iteratorAt(0).r() = %d", jets.iteratorAt(0).r()); // breaks
 
     bool jetWasInCone = false;
 
