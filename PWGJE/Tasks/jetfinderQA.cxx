@@ -970,7 +970,7 @@ struct JetFinderQATask {
     // if (jets.size()==0){
     //   return;
     // }
-    
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 1 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
     TRandom3 randomNumber(0);
     float randomConeEta = randomNumber.Uniform(trackEtaMin + randomConeR, trackEtaMax - randomConeR);
     float randomConePhi = randomNumber.Uniform(0.0, 2 * M_PI);
@@ -984,6 +984,7 @@ struct JetFinderQATask {
         }
       }
     }
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 2 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
 
     registry.fill(HIST("h2_centrality_rhorandomcone"), collision.centrality(), randomConePt - M_PI * randomConeR * randomConeR * collision.rho());
 
@@ -995,6 +996,7 @@ struct JetFinderQATask {
     LOGF(info, "------------------- jets.iteratorAt(0).r() = %d", jets.iteratorAt(0).r()); // breaks
 
     bool jetWasInCone = false;
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 3 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
 
     while (TMath::Sqrt(dEtaLeadingJet * dEtaLeadingJet + dPhiLeadingJet * dPhiLeadingJet) < 0.4 / 100.0 + randomConeR) { // doesn't like jets.iteratorAt(0).r()
 
@@ -1004,6 +1006,7 @@ struct JetFinderQATask {
       dPhiLeadingJet = RecoDecay::constrainAngle(jets.iteratorAt(0).phi() - randomConePhi, static_cast<float>(-M_PI));
       dEtaLeadingJet = jets.iteratorAt(0).eta() - randomConeEta;
     }
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 4 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
 
     if (jetWasInCone) {
       randomConePt = 0.0;
@@ -1017,6 +1020,7 @@ struct JetFinderQATask {
         }
       }
     }
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 5 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
     registry.fill(HIST("h2_centrality_rhorandomconewithoutleadingjet"), collision.centrality(), randomConePt - M_PI * randomConeR * randomConeR * collision.rho());
   }
   PROCESS_SWITCH(JetFinderQATask, processRandomCone, "QA for random cone estimation of background fluctuations", false);
