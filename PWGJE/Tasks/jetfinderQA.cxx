@@ -990,9 +990,9 @@ struct JetFinderQATask {
 
     bool jetWasInCone = false;
     LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 4 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
-    LOGF(info, "------------------- jets.iteratorAt(0).phi() = %f", jets.iteratorAt(0).phi());
-    LOGF(info, "------------------- jets.iteratorAt(0).eta() = %f", jets.iteratorAt(0).eta());
-    LOGF(info, "------------------- jets.iteratorAt(0).r() = %f", jets.iteratorAt(0).r());
+    LOGF(info, "------------------- jets.iteratorAt(0).phi() = %f", jets.iteratorAt(0).phi()); // shows fine
+    LOGF(info, "------------------- jets.iteratorAt(0).eta() = %f", jets.iteratorAt(0).eta()); // shows fine
+    LOGF(info, "------------------- jets.iteratorAt(0).r() = %d", jets.iteratorAt(0).r()); // breaks
 
     while (TMath::Sqrt(dEtaLeadingJet * dEtaLeadingJet + dPhiLeadingJet * dPhiLeadingJet) < jets.iteratorAt(0).r() / 100.0 + randomConeR) { // doesn't like jets.iteratorAt(0).r()
       LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 4.1 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
