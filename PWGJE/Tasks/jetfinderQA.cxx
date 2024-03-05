@@ -966,11 +966,12 @@ struct JetFinderQATask {
 
   void processRandomCone(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Join<aod::ChargedEventWiseSubtractedJets, aod::ChargedEventWiseSubtractedJetConstituents> const& jets, JetTracks const& tracks)
   {
-
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 1 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
     TRandom3 randomNumber(0);
     float randomConeEta = randomNumber.Uniform(trackEtaMin + randomConeR, trackEtaMax - randomConeR);
     float randomConePhi = randomNumber.Uniform(0.0, 2 * M_PI);
     float randomConePt = 0;
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 2 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
     for (auto const& track : tracks) {
       if (jetderiveddatautilities::selectTrack(track, trackSelection)) {
         float dPhi = RecoDecay::constrainAngle(track.phi() - randomConePhi, static_cast<float>(-M_PI));
@@ -980,12 +981,16 @@ struct JetFinderQATask {
         }
       }
     }
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 3 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
+
     registry.fill(HIST("h2_centrality_rhorandomcone"), collision.centrality(), randomConePt - M_PI * randomConeR * randomConeR * collision.rho());
 
     float dPhiLeadingJet = RecoDecay::constrainAngle(jets.iteratorAt(0).phi() - randomConePhi, static_cast<float>(-M_PI));
     float dEtaLeadingJet = jets.iteratorAt(0).eta() - randomConeEta;
 
     bool jetWasInCone = false;
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 4 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
+
     while (TMath::Sqrt(dEtaLeadingJet * dEtaLeadingJet + dPhiLeadingJet * dPhiLeadingJet) < jets.iteratorAt(0).r() / 100.0 + randomConeR) {
       jetWasInCone = true;
       randomConeEta = randomNumber.Uniform(trackEtaMin + randomConeR, trackEtaMax - randomConeR);
@@ -993,6 +998,8 @@ struct JetFinderQATask {
       dPhiLeadingJet = RecoDecay::constrainAngle(jets.iteratorAt(0).phi() - randomConePhi, static_cast<float>(-M_PI));
       dEtaLeadingJet = jets.iteratorAt(0).eta() - randomConeEta;
     }
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 5 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
+
     if (jetWasInCone) {
       randomConePt = 0.0;
       for (auto const& track : tracks) {
@@ -1005,6 +1012,7 @@ struct JetFinderQATask {
         }
       }
     }
+    LOGF(info, "00000000000000000000000000000000000000000000000000000000000000000000000000000000 RandomCone 6 00000000000000000000000000000000000000000000000000000000000000000000000000000000");
     registry.fill(HIST("h2_centrality_rhorandomconewithoutleadingjet"), collision.centrality(), randomConePt - M_PI * randomConeR * randomConeR * collision.rho());
   }
   PROCESS_SWITCH(JetFinderQATask, processRandomCone, "QA for random cone estimation of background fluctuations", false);
