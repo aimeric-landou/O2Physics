@@ -964,8 +964,12 @@ struct JetFinderQATask {
   }
   PROCESS_SWITCH(JetFinderQATask, processRho, "QA for rho-area subtracted jets", false);
 
-  void processRandomCone(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Join<aod::ChargedEventWiseSubtractedets, aod::ChargedEventWiseSubtractedJetConstituents> const& jets, JetTracksSub const& tracks)
+  void processRandomCone(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Join<aod::ChargedEventWiseSubtractedJets, aod::ChargedEventWiseSubtractedJetConstituents> const& jets, JetTracksSub const& tracks)
+  // void processRandomCone(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Join<aod::ChargedJets, aod::ChargedJetConstituents> const& jets, JetTracks const& tracks)
   {
+    // if (jets.size()==0){
+    //   return;
+    // }
     
     TRandom3 randomNumber(0);
     float randomConeEta = randomNumber.Uniform(trackEtaMin + randomConeR, trackEtaMax - randomConeR);
