@@ -32,6 +32,7 @@ namespace bkgrho
 {
 DECLARE_SOA_COLUMN(Rho, rho, float);   //!
 DECLARE_SOA_COLUMN(RhoM, rhoM, float); //!
+DECLARE_SOA_COLUMN(OccupancyFactor, occupancyfactor, float); //!
 } // namespace bkgrho
 
 namespace bkgcharged
@@ -58,25 +59,29 @@ DECLARE_SOA_TABLE(BkgChargedRhos, "AOD", "BkgCRho",
                   o2::soa::Index<>,
                   bkgcharged::JCollisionId,
                   bkgrho::Rho,
-                  bkgrho::RhoM);
+                  bkgrho::RhoM,
+                  bkgrho::OccupancyFactor);
 
 DECLARE_SOA_TABLE(BkgD0Rhos, "AOD", "BkgD0Rho",
                   o2::soa::Index<>,
                   bkgd0::CandidateId,
                   bkgrho::Rho,
-                  bkgrho::RhoM);
+                  bkgrho::RhoM,
+                  bkgrho::OccupancyFactor);
 
 DECLARE_SOA_TABLE(BkgLcRhos, "AOD", "BkgLcRho",
                   o2::soa::Index<>,
                   bkglc::CandidateId,
                   bkgrho::Rho,
-                  bkgrho::RhoM);
+                  bkgrho::RhoM,
+                  bkgrho::OccupancyFactor);
 
 DECLARE_SOA_TABLE(BkgBplusRhos, "AOD", "BkgBPlRho",
                   o2::soa::Index<>,
                   bkgbplus::CandidateId,
                   bkgrho::Rho,
-                  bkgrho::RhoM);
+                  bkgrho::RhoM,
+                  bkgrho::OccupancyFactor);
 
 namespace jtracksub
 {

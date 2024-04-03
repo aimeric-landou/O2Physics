@@ -65,6 +65,7 @@ struct JetFinderQATask {
   Configurable<float> jetAreaFractionMin{"jetAreaFractionMin", -99.0, "used to make a cut on the jet areas"};
   Configurable<float> leadingConstituentPtMin{"leadingConstituentPtMin", -99.0, "minimum pT selection on jet constituent"};
   Configurable<float> randomConeR{"randomConeR", 0.4, "size of random Cone for estimating background fluctuations"};
+  Configurable<int> AimericCollCutOnRhoMultDistrib{"AimericCollCutOnRhoMultDistrib", 0, "0: no cuts; 1: cut out collisions that are not in the weird rho vs mult arm; 2: cut out collisions that are not in the main population in rho vs mult plot --- cuts adapted for 0-10 centralities only"};
 
   std::vector<bool> filledJetR_Both;
   std::vector<bool> filledJetR_Low;
@@ -160,11 +161,15 @@ struct JetFinderQATask {
     if (doprocessRho) {
       registry.add("h2_centrality_ntracks", "; centrality; N_{tracks};", {HistType::kTH2F, {{1100, 0., 110.0}, {10000, 0.0, 10000.0}}});
       registry.add("h2_ntracks_rho", "; N_{tracks}; #it{rho} (GeV/area);", {HistType::kTH2F, {{10000, 0.0, 10000.0}, {400, 0.0, 400.0}}});
+      registry.add("h3_ntracks_rho_occupancyfactor", "; N_{tracks}; #it{rho} (GeV/area); C", {HistType::kTH3F, {{10000, 0.0, 10000.0}, {400, 0.0, 400.0}, {300, 0.0, 1.5}}});
+      registry.add("h2_ntracks_occupancyfactor", "; N_{tracks}; C", {HistType::kTH2F, {{10000, 0.0, 10000.0}, {300, 0.0, 1.5}}});
+      registry.add("h2_rho_occupancyfactor", "; #it{rho} (GeV/area); C", {HistType::kTH2F, {{400, 0.0, 400.0}, {300, 0.0, 1.5}}});
       registry.add("h2_ntracks_rhom", "; N_{tracks}; #it{rho}_{m} (GeV/area);", {HistType::kTH2F, {{10000, 0.0, 10000.0}, {100, 0.0, 100.0}}});
       registry.add("h2_centrality_rho", "; centrality; #it{rho} (GeV/area);", {HistType::kTH2F, {{1100, 0., 110.}, {400, 0., 400.0}}});
       registry.add("h2_centrality_rhom", ";centrality; #it{rho}_{m} (GeV/area)", {HistType::kTH2F, {{1100, 0., 110.}, {100, 0., 100.0}}});
       registry.add("h2_leadingjetpt_rho", "; #it{p}_{T,leading jet}; #it{rho} (GeV/area);", {HistType::kTH2F, {{400, -100., 300.}, {400, 0.0, 400.0}}});
       registry.add("h2_leadingjetpt_rhoareasubtracted_rho", "; #it{p}_{T,leading jet}; #it{rho} (GeV/area);", {HistType::kTH2F, {{400, -100., 300.}, {400, 0.0, 400.0}}});
+      registry.add("h3_jet_r_jet_pt_track_phi_Triggered_Both2", "#it{R}_{jet};#it{p}_{T,jet} (GeV/#it{c});#varphi_{jet tracks}", {HistType::kTH3F, {{jetRadiiBins, ""}, {200, 0., 200.}, {160, -1.0, 7.}}});
     }
 
     if (doprocessRandomCone) {
@@ -524,8 +529,27 @@ struct JetFinderQATask {
     }
   }
 
-  void processJetsData(soa::Filtered<JetCollisions>::iterator const& collision, soa::Join<aod::ChargedJets, aod::ChargedJetConstituents> const& jets, JetTracks const& tracks)
+  void processJetsData(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision, soa::Join<aod::ChargedJets, aod::ChargedJetConstituents> const& jets, JetTracks const& tracks)
   {
+    int nTracks = 0;
+    for (auto const& track : tracks) {
+      if (jetderiveddatautilities::selectTrack(track, trackSelection)) {
+        nTracks++;
+      }
+    }
+
+    if (AimericCollCutOnRhoMultDistrib == 1){ //weird arm of rho vs multiplicity
+      if ((nTracks < 500 && (collision.rho() < 10. + 1./50*nTracks)) || (nTracks >= 500 && (collision.rho() < 0. + 4./50*nTracks))) { // for 0-10% collisions, 2 affine cuts depending on nTracks; I want the rho above those affine lines to fill the plot for the weird arm
+        return;
+      }
+    }
+
+    if (AimericCollCutOnRhoMultDistrib == 2){ //main distribution (not the weird arm of rho vs multiplicity)
+      if ((nTracks < 500 && (collision.rho() > 10. + 1./50*nTracks)) || (nTracks >= 500 && (collision.rho() > 0. + 4./50*nTracks))) { // for 0-10% collisions, 2 affine cuts depending on nTracks; I want the rho below those affine lines to fill the plot for the weird arm
+        return;
+      }
+    }
+
     for (auto const& jet : jets) {
       if (!jetfindingutilities::isInEtaAcceptance(jet, jetEtaMin, jetEtaMax, trackEtaMin, trackEtaMax)) {
         continue;
@@ -817,9 +841,28 @@ struct JetFinderQATask {
   }
   PROCESS_SWITCH(JetFinderQATask, processTriggeredData, "QA for charged jet trigger", false);
 
-  void processTracks(soa::Filtered<JetCollisions>::iterator const& collision,
+  void processTracks(soa::Filtered<soa::Join<JetCollisions, aod::BkgChargedRhos>>::iterator const& collision,
                      soa::Filtered<JetTracks> const& tracks)
   {
+    int nTracks = 0;
+    for (auto const& track : tracks) {
+      if (jetderiveddatautilities::selectTrack(track, trackSelection)) {
+        nTracks++;
+      }
+    }
+
+    if (AimericCollCutOnRhoMultDistrib == 1){ //weird arm of rho vs multiplicity
+      if ((nTracks < 500 && (collision.rho() < 10. + 1./50*nTracks)) || (nTracks >= 500 && (collision.rho() < 0. + 4./50*nTracks))) { // for 0-10% collisions, 2 affine cuts depending on nTracks; I want the rho above those affine lines to fill the plot for the weird arm
+        return;
+      }
+    }
+
+    if (AimericCollCutOnRhoMultDistrib == 2){ //main distribution (not the weird arm of rho vs multiplicity)
+      if ((nTracks < 500 && (collision.rho() > 10. + 1./50*nTracks)) || (nTracks >= 500 && (collision.rho() > 0. + 4./50*nTracks))) { // for 0-10% collisions, 2 affine cuts depending on nTracks; I want the rho below those affine lines to fill the plot for the weird arm
+        return;
+      }
+    }
+
     registry.fill(HIST("h_collisions"), 0.5);
     registry.fill(HIST("h2_centrality_collisions"), collision.centrality(), 0.5);
     if (!jetderiveddatautilities::selectCollision(collision, eventSelection)) {
@@ -870,8 +913,36 @@ struct JetFinderQATask {
         nTracks++;
       }
     }
+    LOGF(info, " ----------- 1"); //this works without issue
+
+    if (AimericCollCutOnRhoMultDistrib == 1){ //weird arm of rho vs multiplicity
+      if ((nTracks < 500 && (collision.rho() < 10. + 1./50*nTracks)) || (nTracks >= 500 && (collision.rho() < 0. + 4./50*nTracks))) { // for 0-10% collisions, 2 affine cuts depending on nTracks; I want the rho above those affine lines to fill the plot for the weird arm
+        return;
+      }
+    }
+
+    if (AimericCollCutOnRhoMultDistrib == 2){ //main distribution (not the weird arm of rho vs multiplicity)
+      if ((nTracks < 500 && (collision.rho() > 10. + 1./50*nTracks)) || (nTracks >= 500 && (collision.rho() > 0. + 4./50*nTracks))) { // for 0-10% collisions, 2 affine cuts depending on nTracks; I want the rho below those affine lines to fill the plot for the weird arm
+        return;
+      }
+    }
+
+    LOGF(info, " ----------- 2"); //this works without issue
+
     registry.fill(HIST("h2_centrality_ntracks"), collision.centrality(), nTracks);
     registry.fill(HIST("h2_ntracks_rho"), nTracks, collision.rho());
+
+    LOGF(info, " ----------- 3 - collision.occupancyfactor() = %f", collision.occupancyfactor()); //this works without issue
+    registry.fill(HIST("h2_rho_occupancyfactor"), collision.rho(), collision.occupancyfactor());
+    registry.fill(HIST("h2_ntracks_occupancyfactor"), nTracks, collision.occupancyfactor());
+    // LOGF(info, "pre h3 bug assumption line - collision.occupancyfactor() = %f", collision.occupancyfactor()); //this works without issue
+    LOGF(info, " ----------- 4"); //this works without issue
+
+    registry.fill(HIST("h3_ntracks_rho_occupancyfactor"), nTracks, collision.rho(), collision.occupancyfactor()); // fonctionne pas ; chelou ça va plus loin (mais crash au bout d'un moment) si je mets d'abord h2_rho_occupancyfactor et h2_rho_occupancyfactor
+    // registry.fill(HIST("h3_ntracks_rho_occupancyfactor"), nTracks, collision.rho(), collision.rho()); // fonctionne
+    // LOGF(info, "post bug assumption line - collision.occupancyfactor() = %f", collision.occupancyfactor()); //this works without issue
+    LOGF(info, " ----------- 5"); //this works without issue
+
     registry.fill(HIST("h2_ntracks_rhom"), nTracks, collision.rhoM());
     registry.fill(HIST("h2_centrality_rho"), collision.centrality(), collision.rho());
     registry.fill(HIST("h2_centrality_rhom"), collision.centrality(), collision.rhoM());
@@ -884,6 +955,8 @@ struct JetFinderQATask {
         leadingJetPt_rhoareasubtracted = jet.pt() - (collision.rho() * jet.area());
       }
     }
+    LOGF(info, " ----------- 6"); //this works without issue
+
     registry.fill(HIST("h2_leadingjetpt_rho"), leadingJetPt, collision.rho());
     registry.fill(HIST("h2_leadingjetpt_rhoareasubtracted_rho"), leadingJetPt_rhoareasubtracted, collision.rho());
   }

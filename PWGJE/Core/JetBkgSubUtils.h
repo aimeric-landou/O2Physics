@@ -73,7 +73,7 @@ class JetBkgSubUtils
   /// @param inputParticles (all particles in the event)
   /// @param doSparseSub weather to do rho sparse subtraction
   /// @return Rho, RhoM the underlying event density
-  std::tuple<double, double> estimateRhoAreaMedian(const std::vector<fastjet::PseudoJet>& inputParticles, bool doSparseSub);
+  std::tuple<double, double, double> estimateRhoAreaMedian(const std::vector<fastjet::PseudoJet>& inputParticles, bool doSparseSub);
 
   /// @brief Background estimator using the perpendicular cone method
   /// @param inputParticles

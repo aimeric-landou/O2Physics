@@ -73,8 +73,8 @@ struct RhoEstimatorTask {
   {
     inputParticles.clear();
     jetfindingutilities::analyseTracks<soa::Filtered<JetTracks>, soa::Filtered<JetTracks>::iterator>(inputParticles, tracks, trackSelection);
-    auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, doSparse);
-    rhoChargedTable(collision.globalIndex(), rho, rhoM);
+    auto [rho, rhoM, occupancyFactor] = bkgSub.estimateRhoAreaMedian(inputParticles, doSparse);
+    rhoChargedTable(collision.globalIndex(), rho, rhoM, occupancyFactor);
   }
   PROCESS_SWITCH(RhoEstimatorTask, processChargedCollisions, "Fill rho tables for collisions using charged tracks", true);
 
@@ -85,8 +85,8 @@ struct RhoEstimatorTask {
       inputParticles.clear();
       jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, std::optional{candidate});
 
-      auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, doSparse);
-      rhoD0Table(candidate.globalIndex(), rho, rhoM);
+      auto [rho, rhoM, occupancyFactor] = bkgSub.estimateRhoAreaMedian(inputParticles, doSparse);
+      rhoD0Table(candidate.globalIndex(), rho, rhoM, occupancyFactor);
     }
   }
   PROCESS_SWITCH(RhoEstimatorTask, processD0Collisions, "Fill rho tables for collisions with D0 candidates", false);
@@ -98,8 +98,8 @@ struct RhoEstimatorTask {
       inputParticles.clear();
       jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, std::optional{candidate});
 
-      auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, doSparse);
-      rhoLcTable(candidate.globalIndex(), rho, rhoM);
+      auto [rho, rhoM, occupancyFactor] = bkgSub.estimateRhoAreaMedian(inputParticles, doSparse);
+      rhoLcTable(candidate.globalIndex(), rho, rhoM, occupancyFactor);
     }
   }
   PROCESS_SWITCH(RhoEstimatorTask, processLcCollisions, "Fill rho tables for collisions with Lc candidates", false);
@@ -111,8 +111,8 @@ struct RhoEstimatorTask {
       inputParticles.clear();
       jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, std::optional{candidate});
 
-      auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, doSparse);
-      rhoBplusTable(candidate.globalIndex(), rho, rhoM);
+      auto [rho, rhoM, occupancyFactor] = bkgSub.estimateRhoAreaMedian(inputParticles, doSparse);
+      rhoBplusTable(candidate.globalIndex(), rho, rhoM, occupancyFactor);
     }
   }
   PROCESS_SWITCH(RhoEstimatorTask, processBplusCollisions, "Fill rho tables for collisions with Bplus candidates", false);

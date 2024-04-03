@@ -41,12 +41,12 @@ void JetBkgSubUtils::initialise()
   selRho = fastjet::SelectorRapRange(bkgEtaMin, bkgEtaMax) && fastjet::SelectorPhiRange(bkgPhiMin, bkgPhiMax) && !fastjet::SelectorNHardest(nHardReject); // here we have to put rap range, to be checked!
 }
 
-std::tuple<double, double> JetBkgSubUtils::estimateRhoAreaMedian(const std::vector<fastjet::PseudoJet>& inputParticles, bool doSparseSub)
+std::tuple<double, double, double> JetBkgSubUtils::estimateRhoAreaMedian(const std::vector<fastjet::PseudoJet>& inputParticles, bool doSparseSub)
 {
   JetBkgSubUtils::initialise();
 
   if (inputParticles.size() == 0) {
-    return std::make_tuple(0.0, 0.0);
+    return std::make_tuple(0.0, 0.0, 0.0);
   }
 
   // cluster the kT jets
@@ -81,14 +81,14 @@ std::tuple<double, double> JetBkgSubUtils::estimateRhoAreaMedian(const std::vect
     rhoM = TMath::Median<double>(rhoMdvector.size(), rhoMdvector.data());
   }
 
+  double occupancyFactor = totalAreaCovered > 0 ? totaljetAreaPhys / totalAreaCovered : 1.;
   if (doSparseSub) {
     // calculate The ocupancy factor, which the ratio of covered area / total area
-    double occupancyFactor = totalAreaCovered > 0 ? totaljetAreaPhys / totalAreaCovered : 1.;
     rho *= occupancyFactor;
     rhoM *= occupancyFactor;
   }
 
-  return std::make_tuple(rho, rhoM);
+  return std::make_tuple(rho, rhoM, occupancyFactor);
 }
 
 std::tuple<double, double> JetBkgSubUtils::estimateRhoPerpCone(const std::vector<fastjet::PseudoJet>& inputParticles, const std::vector<fastjet::PseudoJet>& jets)
