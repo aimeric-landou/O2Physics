@@ -9,9 +9,9 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-// jet finder QA task
+// track efficiency task (global tracks)
 //
-/// \author Nima Zardoshti <nima.zardoshti@cern.ch>
+/// \author Aimeric Landou <aimeric.landou@cern.ch>
 
 #include <cmath>
 #include <TRandom3.h>
