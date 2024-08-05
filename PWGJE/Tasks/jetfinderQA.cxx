@@ -132,7 +132,6 @@ struct JetFinderQATask {
     jetEtaMax < 5 ? etaAxisMax = jetEtaMax : etaAxisMax = 5;
     AxisSpec jetEtaAxis = {nBinsEta, etaAxisMin, etaAxisMax, "#eta"};
 
-    float etaAxisMin, etaAxisMax;
     trackEtaMin > -5 ? etaAxisMin = trackEtaMin : etaAxisMin = -5;
     trackEtaMax < 5 ? etaAxisMax = trackEtaMax : etaAxisMax = 5;
     AxisSpec trackEtaAxis = {nBinsEta, etaAxisMin, etaAxisMax, "#eta"};
