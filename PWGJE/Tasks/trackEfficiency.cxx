@@ -200,6 +200,7 @@ struct TrackEfficiencyJets {
     }
 
     if (doprocessTracks || doprocessTracksWeighted || doprocessTracksGen || doprocessTracksGenWeighted) {
+      AxisSpec centAxis = {101, 0., 101., "centrality (%)"};
       registry.add("h_collisions", "event status;event status;entries", {HistType::kTH1F, {{4, 0.0, 4.0}}});
       registry.add("h2_centrality_collisions", "centrality vs collisions; centrality; collisions", {HistType::kTH2F, {centAxis, {4, 0.0, 4.0}}});
     }
