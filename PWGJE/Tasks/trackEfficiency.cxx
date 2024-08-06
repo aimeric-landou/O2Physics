@@ -60,7 +60,7 @@ struct TrackEfficiencyJets {
   Configurable<float> centralityMax{"centralityMax", 999, ""};
   Configurable<float> vertexZCut{"vertexZCut", 10.0f, "Accepted z-vertex range"};
   Configurable<float> trackDcaZmax{"trackDcaZmax", 99, "additional cut on dcaZ to PV for tracks; uniformTracks in particular don't cut on this at all"};
-  Configurable<int> nBinsLowPt{"nBinsLowPt", 200, "number of pt bins for low pt efficiency histograms"};
+  Configurable<int> nBinsLowPt{"nBinsLowPt", 200, "number of pt bins for low pt (below 10GeV) efficiency histograms"};
 
   // Track QA process function configurables:
   Configurable<float> trackQAEtaMin{"trackEtaMin", -0.9, "minimum eta acceptance for tracks in the processTracks QA"};
@@ -96,6 +96,17 @@ struct TrackEfficiencyJets {
       registry.fill(HIST("h2_track_pt_track_sigmapt"), track.pt(), track.sigma1Pt() * track.pt(), weight);
       registry.fill(HIST("h2_track_pt_high_track_sigma1overpt"), track.pt(), track.sigma1Pt(), weight);
       registry.fill(HIST("h2_track_pt_high_track_sigmapt"), track.pt(), track.sigma1Pt() * track.pt(), weight);
+    }
+  }
+
+  template <typename T, typename U>
+  void fillTrackGenHistograms(T const& collision, U const& mcparticles, float weight = 1.0)
+  {
+    for (auto const& mcparticle : mcparticles) {
+      registry.fill(HIST("h2_centrality_track_pt"), collision.centrality(), mcparticle.pt(), weight);
+      registry.fill(HIST("h2_centrality_track_eta"), collision.centrality(), mcparticle.eta(), weight);
+      registry.fill(HIST("h2_centrality_track_phi"), collision.centrality(), mcparticle.phi(), weight);
+      registry.fill(HIST("h2_centrality_track_energy"), collision.centrality(), mcparticle.energy(), weight);
     }
   }
 
@@ -379,6 +390,36 @@ struct TrackEfficiencyJets {
     fillTrackHistograms(collision, tracks, eventWeight);
   }
   PROCESS_SWITCH(TrackEfficiencyJets, processTracksWeighted, "QA for charged tracks weighted", false);
+
+  void processTracksGen(soa::Filtered<JetCollisions>::iterator const& collision,
+                     soa::Filtered<JetParticles> const& mcparticles)
+  {
+    registry.fill(HIST("h_collisions"), 0.5);
+    registry.fill(HIST("h2_centrality_collisions"), collision.centrality(), 0.5);
+    if (!jetderiveddatautilities::selectCollision(collision, eventSelection)) {
+      return;
+    }
+    registry.fill(HIST("h_collisions"), 1.5);
+    registry.fill(HIST("h2_centrality_collisions"), collision.centrality(), 1.5);
+    fillTrackGenHistograms(collision, mcparticles);
+  }
+  PROCESS_SWITCH(TrackEfficiencyJets, processTracksGen, "QA for charged particles", false);
+
+  void processTracksGenWeighted(soa::Join<JetCollisions, aod::JMcCollisionLbs>::iterator const& collision,
+                             JetMcCollisions const&,
+                             soa::Filtered<JetParticles> const& mcparticles)
+  {
+    float eventWeight = collision.mcCollision().weight();
+    registry.fill(HIST("h_collisions"), 0.5);
+    registry.fill(HIST("h_collisions_weighted"), 0.5, eventWeight);
+    if (!jetderiveddatautilities::selectCollision(collision, eventSelection)) {
+      return;
+    }
+    registry.fill(HIST("h_collisions"), 1.5);
+    registry.fill(HIST("h_collisions_weighted"), 1.5, eventWeight);
+    fillTrackGenHistograms(collision, mcparticles, eventWeight);
+  }
+  PROCESS_SWITCH(TrackEfficiencyJets, processTracksGenWeighted, "QA for charged particles weighted", false);
 };
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc) { return WorkflowSpec{adaptAnalysisTask<TrackEfficiencyJets>(cfgc, TaskName{"track-efficiency"})}; }
