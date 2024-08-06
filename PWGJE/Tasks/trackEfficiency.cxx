@@ -103,10 +103,10 @@ struct TrackEfficiencyJets {
   void fillTrackGenHistograms(T const& collision, U const& mcparticles, float weight = 1.0)
   {
     for (auto const& mcparticle : mcparticles) {
-      registry.fill(HIST("h2_centrality_track_pt"), collision.centrality(), mcparticle.pt(), weight);
-      registry.fill(HIST("h2_centrality_track_eta"), collision.centrality(), mcparticle.eta(), weight);
-      registry.fill(HIST("h2_centrality_track_phi"), collision.centrality(), mcparticle.phi(), weight);
-      registry.fill(HIST("h2_centrality_track_energy"), collision.centrality(), mcparticle.energy(), weight);
+      registry.fill(HIST("h2_centrality_particle_pt"), collision.centrality(), mcparticle.pt(), weight);
+      registry.fill(HIST("h2_centrality_particle_eta"), collision.centrality(), mcparticle.eta(), weight);
+      registry.fill(HIST("h2_centrality_particle_phi"), collision.centrality(), mcparticle.phi(), weight);
+      registry.fill(HIST("h2_centrality_particle_energy"), collision.centrality(), mcparticle.energy(), weight);
     }
   }
 
@@ -179,8 +179,6 @@ struct TrackEfficiencyJets {
 
     if (doprocessTracks || doprocessTracksWeighted) {
       AxisSpec centAxis = {101, 0., 101., "centrality (%)"};
-      registry.add("h_collisions", "event status;event status;entries", {HistType::kTH1F, {{4, 0.0, 4.0}}});
-      registry.add("h2_centrality_collisions", "centrality vs collisions; centrality; collisions", {HistType::kTH2F, {centAxis, {4, 0.0, 4.0}}});
       registry.add("h2_centrality_track_pt", "centrality vs track pT; centrality; #it{p}_{T,track} (GeV/#it{c})", {HistType::kTH2F, {centAxis, {200, 0., 200.}}});
       registry.add("h2_centrality_track_eta", "centrality vs track #eta; centrality; #eta_{track}", {HistType::kTH2F, {centAxis, {100, -1.0, 1.0}}});
       registry.add("h2_centrality_track_phi", "centrality vs track #varphi; centrality; #varphi_{track}", {HistType::kTH2F, {centAxis, {160, -1.0, 7.}}});
@@ -189,9 +187,24 @@ struct TrackEfficiencyJets {
       registry.add("h2_track_pt_high_track_sigmapt", "#sigma(#it{p}_{T})/#it{p}_{T}; #it{p}_{T,track} (GeV/#it{c})", {HistType::kTH2F, {{90, 10., 100.}, {100000, 0.0, 100.0}}});
       registry.add("h2_track_pt_track_sigma1overpt", "#sigma(1/#it{p}_{T}); #it{p}_{T,track} (GeV/#it{c})", {HistType::kTH2F, {{100, 0., 10.}, {1000, 0.0, 10.0}}});
       registry.add("h2_track_pt_high_track_sigma1overpt", "#sigma(1/#it{p}_{T}); #it{p}_{T,track} (GeV/#it{c})", {HistType::kTH2F, {{90, 10., 100.}, {1000, 0.0, 10.0}}});
-      if (doprocessTracksWeighted) {
-        registry.add("h_collisions_weighted", "event status;event status;entries", {HistType::kTH1F, {{4, 0.0, 4.0}}});
-      }
+    }
+
+    if (doprocessTracksGen || doprocessTracksGenWeighted) {
+      AxisSpec centAxis = {101, 0., 101., "centrality (%)"};
+      registry.add("h_collisions", "event status;event status;entries", {HistType::kTH1F, {{4, 0.0, 4.0}}});
+      registry.add("h2_centrality_collisions", "centrality vs collisions; centrality; collisions", {HistType::kTH2F, {centAxis, {4, 0.0, 4.0}}});
+      registry.add("h2_centrality_particle_pt", "centrality vs track pT; centrality; #it{p}_{T,track} (GeV/#it{c})", {HistType::kTH2F, {centAxis, {200, 0., 200.}}});
+      registry.add("h2_centrality_particle_eta", "centrality vs track #eta; centrality; #eta_{track}", {HistType::kTH2F, {centAxis, {100, -1.0, 1.0}}});
+      registry.add("h2_centrality_particle_phi", "centrality vs track #varphi; centrality; #varphi_{track}", {HistType::kTH2F, {centAxis, {160, -1.0, 7.}}});
+      registry.add("h2_centrality_particle_energy", "centrality vs track energy; centrality; Energy GeV", {HistType::kTH2F, {centAxis, {100, 0.0, 100.0}}});
+    }
+
+    if (doprocessTracks || doprocessTracksWeighted || doprocessTracksGen || doprocessTracksGenWeighted) {
+      registry.add("h_collisions", "event status;event status;entries", {HistType::kTH1F, {{4, 0.0, 4.0}}});
+      registry.add("h2_centrality_collisions", "centrality vs collisions; centrality; collisions", {HistType::kTH2F, {centAxis, {4, 0.0, 4.0}}});
+    }
+    if (doprocessTracksWeighted || doprocessTracksGenWeighted) {
+      registry.add("h_collisions_weighted", "event status;event status;entries", {HistType::kTH1F, {{4, 0.0, 4.0}}});
     }
   }
 
