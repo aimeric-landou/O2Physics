@@ -211,7 +211,7 @@ struct TrackEfficiencyJets {
 
   // filters for processTracks QA functions only:
   Filter trackCuts = (aod::jtrack::pt >= trackQAPtMin && aod::jtrack::pt < trackQAPtMax && aod::jtrack::eta > trackQAEtaMin && aod::jtrack::eta < trackQAEtaMax);
-  Filter particleCuts = (aod::jparticle::pt >= trackQAPtMin && aod::jparticle::pt < trackQAPtMax && aod::jparticle::eta > trackQAEtaMin && aod::jparticle::eta < trackQAEtaMax);
+  Filter particleCuts = (aod::jmcparticle::pt >= trackQAPtMin && aod::jmcparticle::pt < trackQAPtMax && aod::jmcparticle::eta > trackQAEtaMin && aod::jmcparticle::eta < trackQAEtaMax);
   Filter eventCuts = (nabs(aod::jcollision::posZ) < vertexZCut && aod::jcollision::centrality >= centralityMin && aod::jcollision::centrality < centralityMax);
 
   void processEFficiencyPurity(JetMcCollision const& mcCollision,
