@@ -60,6 +60,7 @@ struct TrackEfficiencyJets {
   Configurable<float> centralityMax{"centralityMax", 999, ""};
   Configurable<float> vertexZCut{"vertexZCut", 10.0f, "Accepted z-vertex range"};
   Configurable<float> trackDcaZmax{"trackDcaZmax", 99, "additional cut on dcaZ to PV for tracks; uniformTracks in particular don't cut on this at all"};
+  Configurable<int> nBinsLowPt{"nBinsLowPt", 200, "number of pt bins for low pt efficiency histograms"};
 
   // Track QA process function configurables:
   Configurable<float> trackQAEtaMin{"trackEtaMin", -0.9, "minimum eta acceptance for tracks in the processTracks QA"};
@@ -126,8 +127,8 @@ struct TrackEfficiencyJets {
       registry.get<TH1>(HIST("hTrackCutsCounts"))->GetXaxis()->SetBinLabel(4, "mcPartIsPrimary");
       registry.get<TH1>(HIST("hTrackCutsCounts"))->GetXaxis()->SetBinLabel(5, "etaAcc"); // not actually applied here but it will give an idea of what will be done in the post processing
 
-      AxisSpec ptAxis_eff = {250, 0., 5., "#it{p}_{T} (GeV/#it{c})"};
-      AxisSpec ptAxisHigh_eff = {38, 5., 100., "#it{p}_{T} (GeV/#it{c})"};
+      AxisSpec ptAxis_eff = {nBinsLowPt, 0., 10., "#it{p}_{T} (GeV/#it{c})"};
+      AxisSpec ptAxisHigh_eff = {18, 10., 100., "#it{p}_{T} (GeV/#it{c})"};
       AxisSpec etaAxis_eff = {100, -1.0, 1.0, "#eta"};
       AxisSpec phiAxis_eff = {200, -1.0, 7., "#phi"};
 
