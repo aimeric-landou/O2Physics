@@ -305,6 +305,12 @@ struct TrackPropagation {
   }
   PROCESS_SWITCH(TrackPropagation, processStandard, "Process without covariance", true);
 
+  void processStandardRun2(aod::FullTracks const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
+  {
+    fillTrackTables</*TTrack*/ aod::FullTracks, /*Particle*/ aod::FullTracks, /*isMc = */ false, /*fillCovMat =*/false, /*useTrkPid =*/false>(tracks, tracks, collisions, bcs);
+  }
+  PROCESS_SWITCH(TrackPropagation, processStandardRun2, "Process without covariance, Run 2 version", false);
+
   void processStandardWithPID(soa::Join<aod::StoredTracksIU, aod::TracksExtra> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
   {
     fillTrackTables</*TTrack*/ soa::Join<aod::StoredTracksIU, aod::TracksExtra>, /*Particle*/ soa::Join<aod::StoredTracksIU, aod::TracksExtra>, /*isMc = */ false, /*fillCovMat =*/false, /*useTrkPid =*/true>(tracks, tracks, collisions, bcs);
@@ -324,6 +330,12 @@ struct TrackPropagation {
     fillTrackTables</*TTrack*/ soa::Join<aod::StoredTracksIU, aod::TracksCovIU>, /*Particle*/ soa::Join<aod::StoredTracksIU, aod::TracksCovIU>, /*isMc = */ false, /*fillCovMat =*/true, /*useTrkPid =*/false>(tracks, tracks, collisions, bcs);
   }
   PROCESS_SWITCH(TrackPropagation, processCovariance, "Process with covariance", false);
+
+  void processCovarianceRun2(soa::Join<aod::FullTracks, aod::TracksCov> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
+  {
+    fillTrackTables</*TTrack*/ soa::Join<aod::FullTracks, aod::TracksCov>, /*Particle*/ soa::Join<aod::FullTracks, aod::TracksCov>, /*isMc = */ false, /*fillCovMat =*/true, /*useTrkPid =*/false>(tracks, tracks, collisions, bcs);
+  }
+  PROCESS_SWITCH(TrackPropagation, processCovarianceRun2, "Process with covariance, Run 2 version", false);
   // ------------------------
 
   void processCovarianceWithPID(soa::Join<aod::StoredTracksIU, aod::TracksCovIU, aod::TracksExtra> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
