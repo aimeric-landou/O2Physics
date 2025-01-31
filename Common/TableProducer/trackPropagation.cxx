@@ -328,7 +328,7 @@ struct TrackPropagation {
 
   void processCovarianceRun2(soa::Join<aod::FullTracks> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
   {
-    fillTrackTables</*TTrack*/ soa::Join<aod::FullTracks>, /*Particle*/ soa::Join<aod::FullTracks>, /*isMc = */ false, /*fillCovMat =*/true, /*useTrkPid =*/false, /*isRun2 =*/true>(tracks, tracks, collisions, bcs);
+    fillTrackTables</*TTrack*/ aod::FullTracks, /*Particle*/ aod::FullTracks, /*isMc = */ false, /*fillCovMat =*/true, /*useTrkPid =*/false, /*isRun2 =*/true>(tracks, tracks, collisions, bcs);
   }
   PROCESS_SWITCH(TrackPropagation, processCovarianceRun2, "Process with covariance, Run 2 version", false);
   // ------------------------
