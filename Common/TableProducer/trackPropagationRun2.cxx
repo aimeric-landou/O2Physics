@@ -77,31 +77,32 @@ struct TrackPropagationRun2 {
   void init(o2::framework::InitContext& initContext)
   {
     int nEnabledProcesses = 0;
-    if (doprocessStandard) {
-      LOG(info) << "Enabling processStandard";
-      nEnabledProcesses++;
-    }
-    if (doprocessCovarianceMc) {
-      LOG(info) << "Enabling processCovarianceMc";
-      nEnabledProcesses++;
-    }
+    // if (doprocessStandard) {
+    //   LOG(info) << "Enabling processStandard";
+    //   nEnabledProcesses++;
+    // }
+    // if (doprocessCovarianceMc) {
+    //   LOG(info) << "Enabling processCovarianceMc";
+    //   nEnabledProcesses++;
+    // }
 
-    if (doprocessCovariance) {
-      LOG(info) << "Enabling processCovariance";
-      nEnabledProcesses++;
-    }
+    // if (doprocessCovariance) {
+    //   LOG(info) << "Enabling processCovariance";
+    //   nEnabledProcesses++;
+    // }
 
-    if (doprocessStandardWithPID) {
-      LOG(info) << "Enabling processStandardWithPID";
-      nEnabledProcesses++;
-    }
-    if (doprocessCovarianceWithPID) {
-      LOG(info) << "Enabling processCovarianceWithPID";
-      nEnabledProcesses++;
-    }
-    if (nEnabledProcesses != 1) {
-      LOG(fatal) << "Exactly one process flag must be set to true. Please choose one.";
-    }
+    // if (doprocessStandardWithPID) {
+    //   LOG(info) << "Enabling processStandardWithPID";
+    //   nEnabledProcesses++;
+    // }
+    // if (doprocessCovarianceWithPID) {
+    //   LOG(info) << "Enabling processCovarianceWithPID";
+    //   nEnabledProcesses++;
+    // }
+    // if (nEnabledProcesses != 1) {
+    //   LOG(fatal) << "Exactly one process flag must be set to true. Please choose one.";
+    // }
+    
     // Checking if the tables are requested in the workflow and enabling them
     // fillTracksDCA = isTableRequiredInWorkflow(initContext, "TracksDCA");
     fillTracksDCACov = isTableRequiredInWorkflow(initContext, "TracksDCACov");
