@@ -154,9 +154,22 @@ struct TrackPropagationRun2 {
       LOG(info) << "Material look-up table already in place. Not reloading.";
     }
 
-    grpmag = ccdb->getForTimeStamp<o2::parameters::GRPMagField>(grpmagPath, bc.timestamp());
-    LOG(info) << "Setting magnetic field to current " << grpmag->getL3Current() << " A for run " << bc.runNumber() << " from its GRPMagField CCDB object";
-    o2::base::Propagator::initFieldFromGRP(grpmag);
+
+
+    // if (isRun2) { // Run 2 GRP object
+      o2::parameters::GRPObject* grpo = ccdb->getForTimeStamp<o2::parameters::GRPObject>(ccdbPathGrp, bc.timestamp());
+      if (grpo == nullptr) {
+        LOGF(fatal, "Run 2 GRP object (type o2::parameters::GRPObject) is not available in CCDB for run=%d at timestamp=%llu", bc.runNumber(), bc.timestamp());
+      }
+      o2::base::Propagator::initFieldFromGRP(grpo);
+      LOGF(info, "Setting magnetic field to %d kG for run %d from its GRP CCDB object (type o2::parameters::GRPObject)", grpo->getNominalL3Field(), bc.runNumber());
+    // } else {
+    //   grpmag = ccdb->getForTimeStamp<o2::parameters::GRPMagField>(grpmagPath, bc.timestamp());
+    //   LOG(info) << "Setting magnetic field to current " << grpmag->getL3Current() << " A for run " << bc.runNumber() << " from its GRPMagField CCDB object";
+    //   o2::base::Propagator::initFieldFromGRP(grpmag);
+    // }
+
+
     o2::base::Propagator::Instance()->setMatLUT(lut);
     mMeanVtx = ccdb->getForTimeStamp<o2::dataformats::MeanVertexObject>(mVtxPath, bc.timestamp());
     runNumber = bc.runNumber();
