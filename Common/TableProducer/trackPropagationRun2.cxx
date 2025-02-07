@@ -15,6 +15,7 @@
 
 #include "TableHelper.h"
 #include "Common/Tools/TrackTuner.h"
+#include "DataFormatsParameters/GRPObject.h"
 
 // The Run 3 AO2D stores the tracks at the point of innermost update. For a track with ITS this is the innermost (or second innermost)
 // ITS layer. For a track without ITS, this is the TPC inner wall or for loopers in the TPC even a radius beyond that.
