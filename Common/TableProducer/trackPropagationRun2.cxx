@@ -47,7 +47,7 @@ struct TrackPropagationRun2 {
   bool fillTracksDCACov = false;
   int runNumber = -1;
 
-  o2::base::Propagator::MatCorrType matCorr = o2::base::Propagator::MatCorrType::USEMatCorrLUT;
+  o2::base::Propagator::MatCorrType matCorr = o2::base::Propagator::MatCorrType::USEMatCorrNONE;
 
   const o2::dataformats::MeanVertexObject* mMeanVtx = nullptr;
   o2::parameters::GRPMagField* grpmag = nullptr;
@@ -147,13 +147,13 @@ struct TrackPropagationRun2 {
       return;
     }
 
-    // load matLUT for this timestamp
-    if (!lut) {
-      LOG(info) << "Loading material look-up table for timestamp: " << bc.timestamp();
-      lut = o2::base::MatLayerCylSet::rectifyPtrFromFile(ccdb->getForTimeStamp<o2::base::MatLayerCylSet>(lutPath, bc.timestamp()));
-    } else {
-      LOG(info) << "Material look-up table already in place. Not reloading.";
-    }
+    // // load matLUT for this timestamp
+    // if (!lut) {
+    //   LOG(info) << "Loading material look-up table for timestamp: " << bc.timestamp();
+    //   lut = o2::base::MatLayerCylSet::rectifyPtrFromFile(ccdb->getForTimeStamp<o2::base::MatLayerCylSet>(lutPath, bc.timestamp()));
+    // } else {
+    //   LOG(info) << "Material look-up table already in place. Not reloading.";
+    // }
 
 
 
