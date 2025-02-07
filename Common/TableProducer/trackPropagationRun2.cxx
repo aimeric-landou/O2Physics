@@ -181,14 +181,14 @@ struct TrackPropagationRun2 {
     initCCDB(bcs.begin());
 
     if constexpr (fillCovMat) {
-      tracksParCovPropagated.reserve(tracks.size());
-      tracksParCovExtensionPropagated.reserve(tracks.size());
+      // tracksParCovPropagated.reserve(tracks.size());
+      // tracksParCovExtensionPropagated.reserve(tracks.size());
       if (fillTracksDCACov) {
         tracksDCACov.reserve(tracks.size());
       }
     } else {
-      tracksParPropagated.reserve(tracks.size());
-      tracksParExtensionPropagated.reserve(tracks.size());
+      // tracksParPropagated.reserve(tracks.size());
+      // tracksParExtensionPropagated.reserve(tracks.size());
       // if (fillTracksDCA) {
       //   tracksDCA.reserve(tracks.size());
       // }
