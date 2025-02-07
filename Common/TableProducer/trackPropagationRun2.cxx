@@ -171,7 +171,7 @@ struct TrackPropagationRun2 {
     // }
 
 
-    o2::base::Propagator::Instance()->setMatLUT(lut);
+    // o2::base::Propagator::Instance()->setMatLUT(lut);
     mMeanVtx = ccdb->getForTimeStamp<o2::dataformats::MeanVertexObject>(mVtxPath, bc.timestamp());
     runNumber = bc.runNumber();
   }
