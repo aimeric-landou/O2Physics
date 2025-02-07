@@ -35,14 +35,14 @@ struct TrackPropagationRun2 {
   // Produces<aod::StoredTracksCov> tracksParCovPropagated;
   // Produces<aod::TracksCovExtension> tracksParCovExtensionPropagated;
 
-  // Produces<aod::TracksDCA> tracksDCA;
+  Produces<aod::TracksDCA> tracksDCA;
   Produces<aod::TracksDCACov> tracksDCACov;
 
   Produces<aod::TrackTunerTable> tunertable;
 
   Service<o2::ccdb::BasicCCDBManager> ccdb;
 
-  // bool fillTracksDCA = false;
+  bool fillTracksDCA = false;
   bool fillTracksDCACov = false;
   int runNumber = -1;
 
@@ -104,7 +104,7 @@ struct TrackPropagationRun2 {
     // }
 
     // Checking if the tables are requested in the workflow and enabling them
-    // fillTracksDCA = isTableRequiredInWorkflow(initContext, "TracksDCA");
+    fillTracksDCA = isTableRequiredInWorkflow(initContext, "TracksDCA");
     fillTracksDCACov = isTableRequiredInWorkflow(initContext, "TracksDCACov");
 
     ccdb->setURL(ccdburl);
@@ -189,15 +189,15 @@ struct TrackPropagationRun2 {
     } else {
       // tracksParPropagated.reserve(tracks.size());
       // tracksParExtensionPropagated.reserve(tracks.size());
-      // if (fillTracksDCA) {
-      //   tracksDCA.reserve(tracks.size());
-      // }
+      if (fillTracksDCA) {
+        tracksDCA.reserve(tracks.size());
+      }
     }
 
     for (auto& track : tracks) {
       if constexpr (fillCovMat) {
         if (fillTracksDCACov) {
-        // if (fillTracksDCA || fillTracksDCACov) {
+        if (fillTracksDCA || fillTracksDCACov) {
           mDcaInfoCov.set(999, 999, 999, 999, 999);
         }
         setTrackParCov(track, mTrackParCov);
@@ -205,10 +205,10 @@ struct TrackPropagationRun2 {
           mTrackParCov.setPID(track.pidForTracking());
         }
       } else {
-        // if (fillTracksDCA) {
-        //   mDcaInfo[0] = 999;
-        //   mDcaInfo[1] = 999;
-        // }
+        if (fillTracksDCA) {
+          mDcaInfo[0] = 999;
+          mDcaInfo[1] = 999;
+        }
         setTrackPar(track, mTrackPar);
         if constexpr (useTrkPid) {
           mTrackPar.setPID(track.pidForTracking());
@@ -286,18 +286,18 @@ struct TrackPropagationRun2 {
         //                                 mTrackParCov.getSigmaSnpZ(), mTrackParCov.getSigmaSnp2(), mTrackParCov.getSigmaTglY(), mTrackParCov.getSigmaTglZ(), mTrackParCov.getSigmaTglSnp(),
         //                                 mTrackParCov.getSigmaTgl2(), mTrackParCov.getSigma1PtY(), mTrackParCov.getSigma1PtZ(), mTrackParCov.getSigma1PtSnp(), mTrackParCov.getSigma1PtTgl(),
         //                                 mTrackParCov.getSigma1Pt2());
-        // if (fillTracksDCA) {
-        //   tracksDCA(mDcaInfoCov.getY(), mDcaInfoCov.getZ());
-        // }
+        if (fillTracksDCA) {
+          tracksDCA(mDcaInfoCov.getY(), mDcaInfoCov.getZ());
+        }
         if (fillTracksDCACov) {
           tracksDCACov(mDcaInfoCov.getSigmaY2(), mDcaInfoCov.getSigmaZ2());
         }
       } else {
         // tracksParPropagated(track.collisionId(), trackType, mTrackPar.getX(), mTrackPar.getAlpha(), mTrackPar.getY(), mTrackPar.getZ(), mTrackPar.getSnp(), mTrackPar.getTgl(), mTrackPar.getQ2Pt());
         // tracksParExtensionPropagated(mTrackPar.getPt(), mTrackPar.getP(), mTrackPar.getEta(), mTrackPar.getPhi());
-        // if (fillTracksDCA) {
-        //   tracksDCA(mDcaInfo[0], mDcaInfo[1]);
-        // }
+        if (fillTracksDCA) {
+          tracksDCA(mDcaInfo[0], mDcaInfo[1]);
+        }
       }
     }
   }
