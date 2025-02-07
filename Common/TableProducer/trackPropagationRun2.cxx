@@ -196,7 +196,7 @@ struct TrackPropagationRun2 {
 
     for (auto& track : tracks) {
       if constexpr (fillCovMat) {
-        if (fillTracksDCACov) {
+        // if (fillTracksDCACov) {
         if (fillTracksDCA || fillTracksDCACov) {
           mDcaInfoCov.set(999, 999, 999, 999, 999);
         }
