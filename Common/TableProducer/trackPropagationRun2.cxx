@@ -30,12 +30,6 @@ using namespace o2::framework;
 // using namespace o2::framework::expressions;
 
 struct TrackPropagationRun2 {
-  // Produces<aod::StoredTracks> tracksParPropagated;
-  // Produces<aod::TracksExtension> tracksParExtensionPropagated;
-
-  // Produces<aod::StoredTracksCov> tracksParCovPropagated;
-  // Produces<aod::TracksCovExtension> tracksParCovExtensionPropagated;
-
   Produces<aod::TracksDCA> tracksDCA;
   Produces<aod::TracksDCACov> tracksDCACov;
 
@@ -55,7 +49,6 @@ struct TrackPropagationRun2 {
   TrackTuner trackTunerObj;
 
   Configurable<std::string> ccdburl{"ccdb-url", "http://alice-ccdb.cern.ch", "url of the ccdb repository"};
-  Configurable<std::string> lutPath{"lutPath", "GLO/Param/MatLUT", "Path of the Lut parametrization"};
   Configurable<std::string> geoPath{"geoPath", "GLO/Config/GeometryAligned", "Path of the geometry file"};
   Configurable<std::string> ccdbPathGrp{"grpmagPath", "GLO/GRP/GRP", "CCDB path of the grp file (run2)"};
   Configurable<std::string> mVtxPath{"mVtxPath", "GLO/Calib/MeanVertex", "Path of the mean vertex file"};
@@ -68,42 +61,12 @@ struct TrackPropagationRun2 {
   ConfigurableAxis axisPtQA{"axisPtQA", {VARIABLE_WIDTH, 0.0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.4f, 1.5f, 1.6f, 1.7f, 1.8f, 1.9f, 2.0f, 2.2f, 2.4f, 2.6f, 2.8f, 3.0f, 3.2f, 3.4f, 3.6f, 3.8f, 4.0f, 4.4f, 4.8f, 5.2f, 5.6f, 6.0f, 6.5f, 7.0f, 7.5f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 17.0f, 19.0f, 21.0f, 23.0f, 25.0f, 30.0f, 35.0f, 40.0f, 50.0f}, "pt axis for QA histograms"};
   OutputObj<TH1D> trackTunedTracks{TH1D("trackTunedTracks", "", 1, 0.5, 1.5), OutputObjHandlingPolicy::AnalysisObject};
 
-  // OutputObj<TH2F> hDCAxyVsPtRec{TH2F("hDCAxyVsPtRec", ";DCAxy;PtRec", 600, -0.15, 0.15, axisPtQA)};
-  // OutputObj<TH2F> hDCAxyVsPtMC{TH2F("hDCAxyVsPtMC", ";DCAxy;PtMC", 600, -0.15, 0.15, axisPtQA)};
-
   using TracksIUWithMc = soa::Join<aod::StoredTracksIU, aod::McTrackLabels, aod::TracksCovIU>;
 
   HistogramRegistry registry{"registry"};
 
   void init(o2::framework::InitContext& initContext)
   {
-    int nEnabledProcesses = 0;
-    // if (doprocessStandard) {
-    //   LOG(info) << "Enabling processStandard";
-    //   nEnabledProcesses++;
-    // }
-    // if (doprocessCovarianceMc) {
-    //   LOG(info) << "Enabling processCovarianceMc";
-    //   nEnabledProcesses++;
-    // }
-
-    // if (doprocessCovariance) {
-    //   LOG(info) << "Enabling processCovariance";
-    //   nEnabledProcesses++;
-    // }
-
-    // if (doprocessStandardWithPID) {
-    //   LOG(info) << "Enabling processStandardWithPID";
-    //   nEnabledProcesses++;
-    // }
-    // if (doprocessCovarianceWithPID) {
-    //   LOG(info) << "Enabling processCovarianceWithPID";
-    //   nEnabledProcesses++;
-    // }
-    // if (nEnabledProcesses != 1) {
-    //   LOG(fatal) << "Exactly one process flag must be set to true. Please choose one.";
-    // }
-
     // Checking if the tables are requested in the workflow and enabling them
     fillTracksDCA = isTableRequiredInWorkflow(initContext, "TracksDCA");
     fillTracksDCACov = isTableRequiredInWorkflow(initContext, "TracksDCACov");
@@ -147,31 +110,14 @@ struct TrackPropagationRun2 {
       return;
     }
 
-    // // load matLUT for this timestamp
-    // if (!lut) {
-    //   LOG(info) << "Loading material look-up table for timestamp: " << bc.timestamp();
-    //   lut = o2::base::MatLayerCylSet::rectifyPtrFromFile(ccdb->getForTimeStamp<o2::base::MatLayerCylSet>(lutPath, bc.timestamp()));
-    // } else {
-    //   LOG(info) << "Material look-up table already in place. Not reloading.";
-    // }
+    // Run 2 GRP object
+    o2::parameters::GRPObject* grpo = ccdb->getForTimeStamp<o2::parameters::GRPObject>(ccdbPathGrp, bc.timestamp());
+    if (grpo == nullptr) {
+      LOGF(fatal, "Run 2 GRP object (type o2::parameters::GRPObject) is not available in CCDB for run=%d at timestamp=%llu", bc.runNumber(), bc.timestamp());
+    }
+    o2::base::Propagator::initFieldFromGRP(grpo);
+    LOGF(info, "Setting magnetic field to %d kG for run %d from its GRP CCDB object (type o2::parameters::GRPObject)", grpo->getNominalL3Field(), bc.runNumber());
 
-
-
-    // if (isRun2) { // Run 2 GRP object
-      o2::parameters::GRPObject* grpo = ccdb->getForTimeStamp<o2::parameters::GRPObject>(ccdbPathGrp, bc.timestamp());
-      if (grpo == nullptr) {
-        LOGF(fatal, "Run 2 GRP object (type o2::parameters::GRPObject) is not available in CCDB for run=%d at timestamp=%llu", bc.runNumber(), bc.timestamp());
-      }
-      o2::base::Propagator::initFieldFromGRP(grpo);
-      LOGF(info, "Setting magnetic field to %d kG for run %d from its GRP CCDB object (type o2::parameters::GRPObject)", grpo->getNominalL3Field(), bc.runNumber());
-    // } else {
-    //   grpmag = ccdb->getForTimeStamp<o2::parameters::GRPMagField>(grpmagPath, bc.timestamp());
-    //   LOG(info) << "Setting magnetic field to current " << grpmag->getL3Current() << " A for run " << bc.runNumber() << " from its GRPMagField CCDB object";
-    //   o2::base::Propagator::initFieldFromGRP(grpmag);
-    // }
-
-
-    // o2::base::Propagator::Instance()->setMatLUT(lut);
     mMeanVtx = ccdb->getForTimeStamp<o2::dataformats::MeanVertexObject>(mVtxPath, bc.timestamp());
     runNumber = bc.runNumber();
   }
@@ -183,7 +129,7 @@ struct TrackPropagationRun2 {
   o2::track::TrackParametrization<float> mTrackPar;
   o2::track::TrackParametrizationWithError<float> mTrackParCov;
 
-  template <typename TTrack, typename TParticle, bool isMc, bool fillCovMat = false, bool useTrkPid = false>
+  template <typename TTrack, typename TParticle, bool isMc, bool fillCovMat = false>
   void fillTrackTables(TTrack const& tracks,
                        TParticle const&,
                        aod::Collisions const&,
@@ -195,14 +141,10 @@ struct TrackPropagationRun2 {
     initCCDB(bcs.begin());
 
     if constexpr (fillCovMat) {
-      // tracksParCovPropagated.reserve(tracks.size());
-      // tracksParCovExtensionPropagated.reserve(tracks.size());
       if (fillTracksDCACov) {
         tracksDCACov.reserve(tracks.size());
       }
     } else {
-      // tracksParPropagated.reserve(tracks.size());
-      // tracksParExtensionPropagated.reserve(tracks.size());
       if (fillTracksDCA) {
         tracksDCA.reserve(tracks.size());
       }
@@ -215,9 +157,6 @@ struct TrackPropagationRun2 {
           mDcaInfoCov.set(999, 999, 999, 999, 999);
         }
         setTrackParCov(track, mTrackParCov);
-        if constexpr (useTrkPid) {
-          mTrackParCov.setPID(track.pidForTracking());
-        }
       } else {
         if (fillTracksDCA) {
           mDcaInfo[0] = 999;
@@ -249,7 +188,7 @@ struct TrackPropagationRun2 {
         }
         // MC and fillCovMat block ends
         bool isPropagationOK = true;
-
+/alice/data/2017/LHC17p/000282343/pass2_FAST/PWGZZ/Run3_Conversion/297_20220624-2119_child_1/AOD/001/AO2D.root
         if (track.has_collision()) {
           auto const& collision = track.collision();
           if constexpr (fillCovMat) {
@@ -289,17 +228,8 @@ struct TrackPropagationRun2 {
       if (useTrackTuner && fillTrackTunerTable) {
         tunertable(q2OverPtNew);
       }
-      // LOG(info) <<  " trackPropagation (this value filled in tuner table)--> "  << q2OverPtNew;
+
       if constexpr (fillCovMat) {
-        // tracksParPropagated(track.collisionId(), trackType, mTrackParCov.getX(), mTrackParCov.getAlpha(), mTrackParCov.getY(), mTrackParCov.getZ(), mTrackParCov.getSnp(), mTrackParCov.getTgl(), mTrackParCov.getQ2Pt());
-        // tracksParExtensionPropagated(mTrackParCov.getPt(), mTrackParCov.getP(), mTrackParCov.getEta(), mTrackParCov.getPhi());
-        // // TODO do we keep the rho as 0? Also the sigma's are duplicated information
-        // tracksParCovPropagated(std::sqrt(mTrackParCov.getSigmaY2()), std::sqrt(mTrackParCov.getSigmaZ2()), std::sqrt(mTrackParCov.getSigmaSnp2()),
-        //                        std::sqrt(mTrackParCov.getSigmaTgl2()), std::sqrt(mTrackParCov.getSigma1Pt2()), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-        // tracksParCovExtensionPropagated(mTrackParCov.getSigmaY2(), mTrackParCov.getSigmaZY(), mTrackParCov.getSigmaZ2(), mTrackParCov.getSigmaSnpY(),
-        //                                 mTrackParCov.getSigmaSnpZ(), mTrackParCov.getSigmaSnp2(), mTrackParCov.getSigmaTglY(), mTrackParCov.getSigmaTglZ(), mTrackParCov.getSigmaTglSnp(),
-        //                                 mTrackParCov.getSigmaTgl2(), mTrackParCov.getSigma1PtY(), mTrackParCov.getSigma1PtZ(), mTrackParCov.getSigma1PtSnp(), mTrackParCov.getSigma1PtTgl(),
-        //                                 mTrackParCov.getSigma1Pt2());
         if (fillTracksDCA) {
           tracksDCA(mDcaInfoCov.getY(), mDcaInfoCov.getZ());
         }
@@ -307,8 +237,6 @@ struct TrackPropagationRun2 {
           tracksDCACov(mDcaInfoCov.getSigmaY2(), mDcaInfoCov.getSigmaZ2());
         }
       } else {
-        // tracksParPropagated(track.collisionId(), trackType, mTrackPar.getX(), mTrackPar.getAlpha(), mTrackPar.getY(), mTrackPar.getZ(), mTrackPar.getSnp(), mTrackPar.getTgl(), mTrackPar.getQ2Pt());
-        // tracksParExtensionPropagated(mTrackPar.getPt(), mTrackPar.getP(), mTrackPar.getEta(), mTrackPar.getPhi());
         if (fillTracksDCA) {
           tracksDCA(mDcaInfo[0], mDcaInfo[1]);
         }
@@ -316,38 +244,17 @@ struct TrackPropagationRun2 {
     }
   }
 
-  // void processStandard(aod::StoredTracksIU const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
-  // {
-  //   fillTrackTables</*TTrack*/ aod::StoredTracksIU, /*Particle*/ aod::StoredTracksIU, /*isMc = */ false, /*fillCovMat =*/false, /*useTrkPid =*/false>(tracks, tracks, collisions, bcs);
-  // }
-  // PROCESS_SWITCH(TrackPropagation, processStandard, "Process without covariance", true);
-
-  // void processStandardWithPID(soa::Join<aod::StoredTracksIU, aod::TracksExtra> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
-  // {
-  //   fillTrackTables</*TTrack*/ soa::Join<aod::StoredTracksIU, aod::TracksExtra>, /*Particle*/ soa::Join<aod::StoredTracksIU, aod::TracksExtra>, /*isMc = */ false, /*fillCovMat =*/false, /*useTrkPid =*/true>(tracks, tracks, collisions, bcs);
-  // }
-  // PROCESS_SWITCH(TrackPropagation, processStandardWithPID, "Process without covariance and with PID in tracking", false);
-
-  // -----------------------
-  // void processCovarianceMc(TracksIUWithMc const& tracks, aod::McParticles const& mcParticles, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
-  // {
-  //   // auto table_extension = soa::Extend<TracksIUWithMc, aod::extension::MomX>(tracks);
-  //   fillTrackTables</*TTrack*/ TracksIUWithMc, /*Particle*/ aod::McParticles, /*isMc = */ true, /*fillCovMat =*/true, /*useTrkPid =*/false>(tracks, mcParticles, collisions, bcs);
-  // }
-  // PROCESS_SWITCH(TrackPropagation, processCovarianceMc, "Process with covariance on MC", false);
-
-  void processCovarianceRun2(soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
+  void processCovariance(soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
   {
-    fillTrackTables</*TTrack*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*Particle*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*isMc = */ false, /*fillCovMat =*/true, /*useTrkPid =*/false>(tracks, tracks, collisions, bcs);
+    fillTrackTables</*TTrack*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*Particle*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*isMc = */ false, /*fillCovMat =*/true>(tracks, tracks, collisions, bcs);
   }
-  PROCESS_SWITCH(TrackPropagationRun2, processCovarianceRun2, "Process with covariance, Run 2 version", true);
-  // ------------------------
+  PROCESS_SWITCH(TrackPropagationRun2ChangeName, processCovariance, "Process with covariance", false);
 
-//   void processCovarianceWithPID(soa::Join<aod::StoredTracksIU, aod::TracksCovIU, aod::TracksExtra> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
-//   {
-//     fillTrackTables</*TTrack*/ soa::Join<aod::StoredTracksIU, aod::TracksCovIU, aod::TracksExtra>, /*Particle*/ soa::Join<aod::StoredTracksIU, aod::TracksCovIU, aod::TracksExtra>, /*isMc = */ false, /*fillCovMat =*/true, /*useTrkPid =*/false>(tracks, tracks, collisions, bcs);
-//   }
-//   PROCESS_SWITCH(TrackPropagation, processCovarianceWithPID, "Process with covariance and with PID in tracking", false);
+  void processStandard(soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
+  {
+    fillTrackTables</*TTrack*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*Particle*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*isMc = */ false, /*fillCovMat =*/false>(tracks, tracks, collisions, bcs);
+  }
+  PROCESS_SWITCH(TrackPropagationRun2ChangeName, processStandard, "Process without covariance", true);
 };
 
 //****************************************************************************************
