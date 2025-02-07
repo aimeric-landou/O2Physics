@@ -29,11 +29,11 @@ using namespace o2::framework;
 // using namespace o2::framework::expressions;
 
 struct TrackPropagationRun2 {
-  Produces<aod::StoredTracks> tracksParPropagated;
-  Produces<aod::TracksExtension> tracksParExtensionPropagated;
+  // Produces<aod::StoredTracks> tracksParPropagated;
+  // Produces<aod::TracksExtension> tracksParExtensionPropagated;
 
-  Produces<aod::StoredTracksCov> tracksParCovPropagated;
-  Produces<aod::TracksCovExtension> tracksParCovExtensionPropagated;
+  // Produces<aod::StoredTracksCov> tracksParCovPropagated;
+  // Produces<aod::TracksCovExtension> tracksParCovExtensionPropagated;
 
   // Produces<aod::TracksDCA> tracksDCA;
   Produces<aod::TracksDCACov> tracksDCACov;
@@ -102,7 +102,7 @@ struct TrackPropagationRun2 {
     // if (nEnabledProcesses != 1) {
     //   LOG(fatal) << "Exactly one process flag must be set to true. Please choose one.";
     // }
-    
+
     // Checking if the tables are requested in the workflow and enabling them
     // fillTracksDCA = isTableRequiredInWorkflow(initContext, "TracksDCA");
     fillTracksDCACov = isTableRequiredInWorkflow(initContext, "TracksDCACov");
@@ -277,15 +277,15 @@ struct TrackPropagationRun2 {
       }
       // LOG(info) <<  " trackPropagation (this value filled in tuner table)--> "  << q2OverPtNew;
       if constexpr (fillCovMat) {
-        tracksParPropagated(track.collisionId(), trackType, mTrackParCov.getX(), mTrackParCov.getAlpha(), mTrackParCov.getY(), mTrackParCov.getZ(), mTrackParCov.getSnp(), mTrackParCov.getTgl(), mTrackParCov.getQ2Pt());
-        tracksParExtensionPropagated(mTrackParCov.getPt(), mTrackParCov.getP(), mTrackParCov.getEta(), mTrackParCov.getPhi());
-        // TODO do we keep the rho as 0? Also the sigma's are duplicated information
-        tracksParCovPropagated(std::sqrt(mTrackParCov.getSigmaY2()), std::sqrt(mTrackParCov.getSigmaZ2()), std::sqrt(mTrackParCov.getSigmaSnp2()),
-                               std::sqrt(mTrackParCov.getSigmaTgl2()), std::sqrt(mTrackParCov.getSigma1Pt2()), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-        tracksParCovExtensionPropagated(mTrackParCov.getSigmaY2(), mTrackParCov.getSigmaZY(), mTrackParCov.getSigmaZ2(), mTrackParCov.getSigmaSnpY(),
-                                        mTrackParCov.getSigmaSnpZ(), mTrackParCov.getSigmaSnp2(), mTrackParCov.getSigmaTglY(), mTrackParCov.getSigmaTglZ(), mTrackParCov.getSigmaTglSnp(),
-                                        mTrackParCov.getSigmaTgl2(), mTrackParCov.getSigma1PtY(), mTrackParCov.getSigma1PtZ(), mTrackParCov.getSigma1PtSnp(), mTrackParCov.getSigma1PtTgl(),
-                                        mTrackParCov.getSigma1Pt2());
+        // tracksParPropagated(track.collisionId(), trackType, mTrackParCov.getX(), mTrackParCov.getAlpha(), mTrackParCov.getY(), mTrackParCov.getZ(), mTrackParCov.getSnp(), mTrackParCov.getTgl(), mTrackParCov.getQ2Pt());
+        // tracksParExtensionPropagated(mTrackParCov.getPt(), mTrackParCov.getP(), mTrackParCov.getEta(), mTrackParCov.getPhi());
+        // // TODO do we keep the rho as 0? Also the sigma's are duplicated information
+        // tracksParCovPropagated(std::sqrt(mTrackParCov.getSigmaY2()), std::sqrt(mTrackParCov.getSigmaZ2()), std::sqrt(mTrackParCov.getSigmaSnp2()),
+        //                        std::sqrt(mTrackParCov.getSigmaTgl2()), std::sqrt(mTrackParCov.getSigma1Pt2()), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        // tracksParCovExtensionPropagated(mTrackParCov.getSigmaY2(), mTrackParCov.getSigmaZY(), mTrackParCov.getSigmaZ2(), mTrackParCov.getSigmaSnpY(),
+        //                                 mTrackParCov.getSigmaSnpZ(), mTrackParCov.getSigmaSnp2(), mTrackParCov.getSigmaTglY(), mTrackParCov.getSigmaTglZ(), mTrackParCov.getSigmaTglSnp(),
+        //                                 mTrackParCov.getSigmaTgl2(), mTrackParCov.getSigma1PtY(), mTrackParCov.getSigma1PtZ(), mTrackParCov.getSigma1PtSnp(), mTrackParCov.getSigma1PtTgl(),
+        //                                 mTrackParCov.getSigma1Pt2());
         // if (fillTracksDCA) {
         //   tracksDCA(mDcaInfoCov.getY(), mDcaInfoCov.getZ());
         // }
@@ -293,8 +293,8 @@ struct TrackPropagationRun2 {
           tracksDCACov(mDcaInfoCov.getSigmaY2(), mDcaInfoCov.getSigmaZ2());
         }
       } else {
-        tracksParPropagated(track.collisionId(), trackType, mTrackPar.getX(), mTrackPar.getAlpha(), mTrackPar.getY(), mTrackPar.getZ(), mTrackPar.getSnp(), mTrackPar.getTgl(), mTrackPar.getQ2Pt());
-        tracksParExtensionPropagated(mTrackPar.getPt(), mTrackPar.getP(), mTrackPar.getEta(), mTrackPar.getPhi());
+        // tracksParPropagated(track.collisionId(), trackType, mTrackPar.getX(), mTrackPar.getAlpha(), mTrackPar.getY(), mTrackPar.getZ(), mTrackPar.getSnp(), mTrackPar.getTgl(), mTrackPar.getQ2Pt());
+        // tracksParExtensionPropagated(mTrackPar.getPt(), mTrackPar.getP(), mTrackPar.getEta(), mTrackPar.getPhi());
         // if (fillTracksDCA) {
         //   tracksDCA(mDcaInfo[0], mDcaInfo[1]);
         // }
