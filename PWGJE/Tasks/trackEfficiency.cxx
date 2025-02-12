@@ -55,11 +55,8 @@ struct TrackEfficiencyJets {
 
   // Tracking efficiency process function configurables:
   Configurable<bool> checkPrimaryPart{"checkPrimaryPart", true, "0: doesn't check mcparticle.isPhysicalPrimary() - 1: checks particle.isPhysicalPrimary()"};
-  Configurable<bool> checkCentrality{"checkCentrality", false, ""};
   Configurable<int> acceptSplitCollisions{"acceptSplitCollisions", 0, "0: only look at mcCollisions that are not split; 1: accept split mcCollisions, 2: accept split mcCollisions but only look at the first reco collision associated with it"};
   Configurable<float> trackEtaAcceptanceCountQA{"trackEtaAcceptanceCountQA", 0.9, "eta acceptance"}; // removed from actual cuts for now because all the histograms have an eta axis
-  Configurable<float> centralityMin{"centralityMin", -999, ""};
-  Configurable<float> centralityMax{"centralityMax", 999, ""};
   Configurable<float> vertexZCut{"vertexZCut", 10.0f, "Accepted z-vertex range"};
   Configurable<float> trackDcaZmax{"trackDcaZmax", 99, "additional cut on dcaZ to PV for tracks; uniformTracks in particular don't cut on this at all"};
   Configurable<int> nBinsLowPt{"nBinsLowPt", 200, "number of pt bins for low pt (below 10GeV) efficiency histograms"};
@@ -69,6 +66,10 @@ struct TrackEfficiencyJets {
   Configurable<float> trackQAEtaMax{"trackQAEtaMax", 0.9, "maximum eta acceptance for tracks in the processTracks QA"};
   Configurable<float> trackQAPtMin{"trackQAPtMin", 0.15, "minimum pT acceptance for tracks in the processTracks QA"};
   Configurable<float> trackQAPtMax{"trackQAPtMax", 100.0, "maximum pT acceptance for tracks in the processTracks QA"};
+
+  // Common configurables:
+  Configurable<float> centralityMin{"centralityMin", -999, ""};
+  Configurable<float> centralityMax{"centralityMax", 999, ""};
   Configurable<int> trackOccupancyInTimeRangeMax{"trackOccupancyInTimeRangeMax", 999999, "maximum occupancy of tracks in neighbouring collisions in a given time range; only applied for reconstructed tracks, not mc particles"};
   Configurable<int> trackOccupancyInTimeRangeMin{"trackOccupancyInTimeRangeMin", -999999, "minimum occupancy of tracks in neighbouring collisions in a given time range; only applied for reconstructed tracks, not mc particles"};
 
@@ -255,21 +256,28 @@ struct TrackEfficiencyJets {
     registry.fill(HIST("hMcCollCutsCounts"), 3.5); // split mcCollisions condition
 
     bool hasSel8Coll = false;
-    bool centralityCheck = false;
+    bool centralityIsGood = false;
+    bool occupancyIsGood = false;
     if (acceptSplitCollisions == 2) {                                                     // check only that the first reconstructed collision passes the check
       if (jetderiveddatautilities::selectCollision(collisions.begin(), eventSelectionBits)) { // Skipping MC events that have not a single selected reconstructed collision ; effect unclear if mcColl is split
         hasSel8Coll = true;
       }
-      if (!checkCentrality || ((centralityMin < collisions.begin().centrality()) && (collisions.begin().centrality() < centralityMax))) { // effect unclear if mcColl is split
-        centralityCheck = true;
+      if ((centralityMin < collisions.begin().centrality()) && (collisions.begin().centrality() < centralityMax)) { // effect unclear if mcColl is split
+        centralityIsGood = true;
+      }
+      if ((trackOccupancyInTimeRangeMin < collisions.begin().trackOccupancyInTimeRange()) && (collisions.begin().trackOccupancyInTimeRange() < trackOccupancyInTimeRangeMax)) {
+        occupancyIsGood = true;
       }
     } else { // check that at least one of the reconstructed collisions passes the checks
       for (auto& collision : collisions) {
         if (jetderiveddatautilities::selectCollision(collision, eventSelectionBits)) { // Skipping MC events that have not a single selected reconstructed collision ; effect unclear if mcColl is split
           hasSel8Coll = true;
         }
-        if (!checkCentrality || ((centralityMin < collision.centrality()) && (collision.centrality() < centralityMax))) { // effect unclear if mcColl is split
-          centralityCheck = true;
+        if ((centralityMin < collision.centrality()) && (collision.centrality() < centralityMax)) { // effect unclear if mcColl is split
+          centralityIsGood = true;
+        }
+        if ((trackOccupancyInTimeRangeMin < collision.trackOccupancyInTimeRange()) && (collision.trackOccupancyInTimeRange() < trackOccupancyInTimeRangeMax)) {
+        occupancyIsGood = true;
         }
       }
     }
@@ -278,10 +286,15 @@ struct TrackEfficiencyJets {
     }
     registry.fill(HIST("hMcCollCutsCounts"), 4.5); // at least one of the reconstructed collisions associated with this mcCollision is selected
 
-    if (!centralityCheck) {
+    if (!centralityIsGood) {
       return;
     }
     registry.fill(HIST("hMcCollCutsCounts"), 5.5); // at least one of the reconstructed collisions associated with this mcCollision is selected with regard to centrality
+
+    if (!occupancyIsGood) {
+      return;
+    }
+    registry.fill(HIST("hMcCollCutsCounts"), 6.5); // at least one of the reconstructed collisions associated with this mcCollision is selected with regard to centrality
 
     for (auto& jMcParticle : jMcParticles) {
       registry.fill(HIST("hMcPartCutsCounts"), 0.5); // allPartsInSelMcColl
@@ -444,28 +457,35 @@ struct TrackEfficiencyJets {
     }
 
     bool hasSel8Coll = false;
-    bool centralityCheck = false;
+    bool centralityIsGood = false;
+    bool occupancyIsGood = false;
     if (acceptSplitCollisions == 2) {                                                     // check only that the first reconstructed collision passes the check
       if (jetderiveddatautilities::selectCollision(collisions.begin(), eventSelectionBits)) { // Skipping MC events that have not a single selected reconstructed collision ; effect unclear if mcColl is split
         hasSel8Coll = true;
       }
-      if (!checkCentrality || ((centralityMin < collisions.begin().centrality()) && (collisions.begin().centrality() < centralityMax))) { // effect unclear if mcColl is split
-        centralityCheck = true;
+      if ((centralityMin < collisions.begin().centrality()) && (collisions.begin().centrality() < centralityMax)) { // effect unclear if mcColl is split
+        centralityIsGood = true;
+      }
+      if ((trackOccupancyInTimeRangeMin < collisions.begin().trackOccupancyInTimeRange()) && (collisions.begin().trackOccupancyInTimeRange() < trackOccupancyInTimeRangeMax)) {
+        occupancyIsGood = true;
       }
     } else { // check that at least one of the reconstructed collisions passes the checks
       for (auto& collision : collisions) {
         if (jetderiveddatautilities::selectCollision(collision, eventSelectionBits)) { // Skipping MC events that have not a single selected reconstructed collision ; effect unclear if mcColl is split
           hasSel8Coll = true;
         }
-        if (!checkCentrality || ((centralityMin < collision.centrality()) && (collision.centrality() < centralityMax))) { // effect unclear if mcColl is split
-          centralityCheck = true;
+        if ((centralityMin < collision.centrality()) && (collision.centrality() < centralityMax)) { // effect unclear if mcColl is split
+          centralityIsGood = true;
+        }
+        if ((trackOccupancyInTimeRangeMin < collision.trackOccupancyInTimeRange()) && (collision.trackOccupancyInTimeRange() < trackOccupancyInTimeRangeMax)) {
+          occupancyIsGood = true;
         }
       }
     }
     if (!hasSel8Coll) {
       return;
     }
-    if (!centralityCheck) {
+    if (!centralityIsGood) {
       return;
     }
 
@@ -494,28 +514,35 @@ struct TrackEfficiencyJets {
     }
 
     bool hasSel8Coll = false;
-    bool centralityCheck = false;
+    bool centralityIsGood = false;
+    bool occupancyIsGood = false;
     if (acceptSplitCollisions == 2) {                                                     // check only that the first reconstructed collision passes the check
       if (jetderiveddatautilities::selectCollision(collisions.begin(), eventSelectionBits)) { // Skipping MC events that have not a single selected reconstructed collision ; effect unclear if mcColl is split
         hasSel8Coll = true;
       }
-      if (!checkCentrality || ((centralityMin < collisions.begin().centrality()) && (collisions.begin().centrality() < centralityMax))) { // effect unclear if mcColl is split
-        centralityCheck = true;
+      if ((centralityMin < collisions.begin().centrality()) && (collisions.begin().centrality() < centralityMax)) { // effect unclear if mcColl is split
+        centralityIsGood = true;
+      }
+      if ((trackOccupancyInTimeRangeMin < collisions.begin().trackOccupancyInTimeRange()) && (collisions.begin().trackOccupancyInTimeRange() < trackOccupancyInTimeRangeMax)) {
+        occupancyIsGood = true;
       }
     } else { // check that at least one of the reconstructed collisions passes the checks
       for (auto& collision : collisions) {
         if (jetderiveddatautilities::selectCollision(collision, eventSelectionBits)) { // Skipping MC events that have not a single selected reconstructed collision ; effect unclear if mcColl is split
           hasSel8Coll = true;
         }
-        if (!checkCentrality || ((centralityMin < collision.centrality()) && (collision.centrality() < centralityMax))) { // effect unclear if mcColl is split
-          centralityCheck = true;
+        if ((centralityMin < collision.centrality()) && (collision.centrality() < centralityMax)) { // effect unclear if mcColl is split
+          centralityIsGood = true;
+        }
+        if ((trackOccupancyInTimeRangeMin < collision.trackOccupancyInTimeRange()) && (collision.trackOccupancyInTimeRange() < trackOccupancyInTimeRangeMax)) {
+          occupancyIsGood = true;
         }
       }
     }
     if (!hasSel8Coll) {
       return;
     }
-    if (!centralityCheck) {
+    if (!centralityIsGood) {
       return;
     }
 
