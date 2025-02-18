@@ -29,7 +29,7 @@ using namespace o2;
 using namespace o2::framework;
 // using namespace o2::framework::expressions;
 
-struct TrackPropagationRun2 {
+struct TrackDcaFillerRun2 {
   Produces<aod::TracksDCA> tracksDCA;
   Produces<aod::TracksDCACov> tracksDCACov;
 
@@ -205,13 +205,13 @@ struct TrackPropagationRun2 {
   {
     fillTrackTables</*TTrack*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*Particle*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*isMc = */ false, /*fillCovMat =*/true>(tracks, tracks, collisions, bcs);
   }
-  PROCESS_SWITCH(TrackPropagationRun2ChangeName, processCovariance, "Process with covariance", false);
+  PROCESS_SWITCH(TrackDcaFillerRun2, processCovariance, "Process with covariance", false);
 
   void processStandard(soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov> const& tracks, aod::Collisions const& collisions, aod::BCsWithTimestamps const& bcs)
   {
     fillTrackTables</*TTrack*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*Particle*/ soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksCov>, /*isMc = */ false, /*fillCovMat =*/false>(tracks, tracks, collisions, bcs);
   }
-  PROCESS_SWITCH(TrackPropagationRun2ChangeName, processStandard, "Process without covariance", true);
+  PROCESS_SWITCH(TrackDcaFillerRun2, processStandard, "Process without covariance", true);
 };
 
 //****************************************************************************************
@@ -221,6 +221,6 @@ struct TrackPropagationRun2 {
 //****************************************************************************************
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
 {
-  WorkflowSpec workflow{adaptAnalysisTask<TrackPropagationRun2>(cfgc)};
+  WorkflowSpec workflow{adaptAnalysisTask<TrackDcaFillerRun2>(cfgc)};
   return workflow;
 }
