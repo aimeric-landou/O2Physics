@@ -76,8 +76,29 @@ fastjet::ClusterSequenceArea jetToPseudoJet(T const& jet, U const& /*tracks*/, V
   jetReclusterer.jetR = jet.r() / 100.0;
   fastjet::ClusterSequenceArea clusterSeq = jetReclusterer.findJets(jetConstituents, jetReclustered);
   jetReclustered = sorted_by_pt(jetReclustered);
-  pseudoJet = jetReclustered[0];
   return clusterSeq;
+}
+
+/**
+ * convert an O2Physics jet collection to a fastjet pseudojet object collection
+ *
+ * @param jets jet collection to be converted
+ * @param tracks vector of constituent tracks
+ * @param clusters vector of constituent clusters
+ * @param candidates vector of constituent candidates
+ * @param pseudoJet converted pseudoJet object which is passed by reference
+ */
+template <typename T, typename U, typename V, typename O>
+void jetCollectionToPseudoJetCollection(T const& jets, U const& tracks, V const& clusters, O const& candidates, std::vector<fastjet::PseudoJet>& pseudoJetCollection, int hadronicCorrectionType = 0)
+{
+  pseudoJetCollection.clear();
+  fastjet::PseudoJet pseudoJet;
+  std::vector<fastjet::PseudoJet> pseudoJetCollectionUnsorted;
+  for (auto& jet : jets) {
+    jetToPseudoJet(jet, tracks, clusters, candidates, pseudoJet, hadronicCorrectionType);
+    pseudoJetCollectionUnsorted.push_back(pseudoJet);
+  }
+  // pseudoJetCollection = fastjet::sorted_by_pt(pseudoJetCollectionUnsorted);
 }
 
 /**
