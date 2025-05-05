@@ -549,6 +549,9 @@ struct JetSpectraCharged {
 
   void processCollisions(soa::Filtered<aod::JetCollisions>::iterator const& collision)
   {
+    if (!collision.has_mcCollision()) {
+      registry.fill(HIST("h_fakecollisions"), 0.5);
+    }
     registry.fill(HIST("h_collisions"), 0.5);
     if (!jetderiveddatautilities::selectCollision(collision, eventSelectionBits, skipMBGapEvents)) {
       return;
