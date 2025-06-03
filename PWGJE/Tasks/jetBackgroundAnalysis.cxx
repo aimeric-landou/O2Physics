@@ -326,7 +326,7 @@ struct JetBackgroundAnalysisTask {
     int hadronicCorrectionType = 0;
     std::vector<fastjet::PseudoJet> nonReclusteredPseudoJetCollection = jetsubstructureutilities::jetCollectionToPseudoJetCollectionWithoutReclustering(jets, tracks, tracks, tracks, hadronicCorrectionType);
 
-    auto [rhoPerp, rhoMPerp] = bkgSub.estimateRhoPerpCone(inputParticles, pseudoJetCollection);
+    auto [rhoPerp, rhoMPerp] = bkgSub.estimateRhoPerpCone(inputParticles, nonReclusteredPseudoJetCollection);
 
     int nTracks = 0;
     for (auto const& track : tracks) {
@@ -341,7 +341,7 @@ struct JetBackgroundAnalysisTask {
     registry.fill(HIST("h2_centrality_rhom_perp"), collision.centrality(), rhoMPerp);
     registry.fill(HIST("h2_centrality_deltarho_perp"), collision.centrality(), rhoPerp - collision.rho());
     
-    LOGF(info, "Finished processing of collision %d", collision.globalIndex()); THIS THING IS SUPER SUPER LONG
+    LOGF(info, "Finished processing of collision %d", collision.globalIndex());
   }
   PROCESS_SWITCH(JetBackgroundAnalysisTask, processRhoPerpendicular, "QA for rho perp", false);
 
