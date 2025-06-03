@@ -323,9 +323,8 @@ struct JetBackgroundAnalysisTask {
 
     inputParticles.clear();
     jetfindingutilities::analyseTracks<soa::Filtered<aod::JetTracks>, soa::Filtered<aod::JetTracks>::iterator>(inputParticles, tracks, trackSelection, trackingEfficiency);
-    std::vector<fastjet::PseudoJet> pseudoJetCollection;
     int hadronicCorrectionType = 0;
-    jetsubstructureutilities::jetCollectionToPseudoJetCollection(jets, tracks, tracks, tracks, pseudoJetCollection, hadronicCorrectionType);
+    std::vector<fastjet::PseudoJet> nonReclusteredPseudoJetCollection = jetsubstructureutilities::jetCollectionToPseudoJetCollectionWithoutReclustering(jets, tracks, tracks, tracks, hadronicCorrectionType);
 
     auto [rhoPerp, rhoMPerp] = bkgSub.estimateRhoPerpCone(inputParticles, pseudoJetCollection);
 

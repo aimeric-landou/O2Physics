@@ -80,25 +80,53 @@ fastjet::ClusterSequenceArea jetToPseudoJet(T const& jet, U const& /*tracks*/, V
 }
 
 /**
- * convert an O2Physics jet collection to a fastjet pseudojet object collection
+ * convert an O2Physics jet to a fastjet pseudojet object, without reclustering to save processing time
+ *
+ * @param jet jet to be converted
+ * @param tracks vector of constituent tracks
+ * @param clusters vector of constituent clusters
+ * @param candidates vector of constituent candidates
+ */
+template <typename T, typename U, typename V, typename O>
+fastjet::PseudoJet jetToPseudoJetWithoutReclustering(T const& jet, U const& /*tracks*/, V const& /*clusters*/, O const& /*candidates*/, int hadronicCorrectionType = 0)
+{
+  std::vector<fastjet::PseudoJet> jetConstituents;
+  for (auto& jetConstituent : jet.template tracks_as<U>()) {
+    fastjetutilities::fillTracks(jetConstituent, jetConstituents, jetConstituent.globalIndex());
+  }
+  if constexpr (std::is_same_v<std::decay_t<typename V::iterator>, o2::aod::JetClusters::iterator> || std::is_same_v<std::decay_t<typename V::iterator>, o2::aod::JetClusters::filtered_iterator>) {
+    for (auto& jetClusterConstituent : jet.template clusters_as<V>()) {
+      fastjetutilities::fillClusters(jetClusterConstituent, jetConstituents, jetClusterConstituent.globalIndex(), hadronicCorrectionType);
+    }
+  }
+  if constexpr (jetcandidateutilities::isCandidateTable<O>() || jetcandidateutilities::isCandidateMcTable<O>()) {
+    for (auto& jetHFConstituent : jet.template candidates_as<O>()) {
+      fastjetutilities::fillTracks(jetHFConstituent, jetConstituents, jetHFConstituent.globalIndex(), static_cast<int>(JetConstituentStatus::candidate), jetcandidateutilities::getTablePDGMass<O>());
+    }
+  }
+  PseudoJet unclusteredPseudoJet = join(jetConstituents);
+  return unclusteredPseudoJet;
+}
+
+/**
+ * convert an O2Physics jet collection to a fastjet pseudojet object collection, without reclustering to save processing time
  *
  * @param jets jet collection to be converted
  * @param tracks vector of constituent tracks
  * @param clusters vector of constituent clusters
  * @param candidates vector of constituent candidates
- * @param pseudoJet converted pseudoJet object which is passed by reference
  */
 template <typename T, typename U, typename V, typename O>
-void jetCollectionToPseudoJetCollection(T const& jets, U const& tracks, V const& clusters, O const& candidates, std::vector<fastjet::PseudoJet>& pseudoJetCollection, int hadronicCorrectionType = 0)
+std::vector<fastjet::PseudoJet> jetCollectionToPseudoJetCollectionWithoutReclustering(T const& jets, U const& tracks, V const& clusters, O const& candidates, int hadronicCorrectionType = 0)
 {
   pseudoJetCollection.clear();
   fastjet::PseudoJet pseudoJet;
-  std::vector<fastjet::PseudoJet> pseudoJetCollectionUnsorted;
+  std::vector<fastjet::PseudoJet> pseudoJetCollectionWithoutReclusteringUnsorted;
   for (auto& jet : jets) {
-    jetToPseudoJet(jet, tracks, clusters, candidates, pseudoJet, hadronicCorrectionType);
-    pseudoJetCollectionUnsorted.push_back(pseudoJet);
+    pseudoJetCollectionWithoutReclusteringUnsorted.push_back(jetToPseudoJetWithoutReclustering(jet, tracks, clusters, candidates, hadronicCorrectionType));
   }
-  // pseudoJetCollection = fastjet::sorted_by_pt(pseudoJetCollectionUnsorted);
+  pseudoJetCollection = fastjet::sorted_by_pt(pseudoJetCollectionWithoutReclusteringUnsorted);
+  return pseudoJetCollection;
 }
 
 /**
