@@ -104,7 +104,7 @@ fastjet::PseudoJet jetToPseudoJetWithoutReclustering(T const& jet, U const& /*tr
       fastjetutilities::fillTracks(jetHFConstituent, jetConstituents, jetHFConstituent.globalIndex(), static_cast<int>(JetConstituentStatus::candidate), jetcandidateutilities::getTablePDGMass<O>());
     }
   }
-  PseudoJet unclusteredPseudoJet = join(jetConstituents);
+  fastjet::PseudoJet unclusteredPseudoJet = join(jetConstituents);
   return unclusteredPseudoJet;
 }
 
@@ -119,13 +119,12 @@ fastjet::PseudoJet jetToPseudoJetWithoutReclustering(T const& jet, U const& /*tr
 template <typename T, typename U, typename V, typename O>
 std::vector<fastjet::PseudoJet> jetCollectionToPseudoJetCollectionWithoutReclustering(T const& jets, U const& tracks, V const& clusters, O const& candidates, int hadronicCorrectionType = 0)
 {
-  pseudoJetCollection.clear();
   fastjet::PseudoJet pseudoJet;
   std::vector<fastjet::PseudoJet> pseudoJetCollectionWithoutReclusteringUnsorted;
   for (auto& jet : jets) {
     pseudoJetCollectionWithoutReclusteringUnsorted.push_back(jetToPseudoJetWithoutReclustering(jet, tracks, clusters, candidates, hadronicCorrectionType));
   }
-  pseudoJetCollection = fastjet::sorted_by_pt(pseudoJetCollectionWithoutReclusteringUnsorted);
+  std::vector<fastjet::PseudoJet> pseudoJetCollection = fastjet::sorted_by_pt(pseudoJetCollectionWithoutReclusteringUnsorted);
   return pseudoJetCollection;
 }
 
