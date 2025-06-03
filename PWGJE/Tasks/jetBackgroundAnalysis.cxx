@@ -340,8 +340,6 @@ struct JetBackgroundAnalysisTask {
     registry.fill(HIST("h2_centrality_rho_perp"), collision.centrality(), rhoPerp);
     registry.fill(HIST("h2_centrality_rhom_perp"), collision.centrality(), rhoMPerp);
     registry.fill(HIST("h2_centrality_deltarho_perp"), collision.centrality(), rhoPerp - collision.rho());
-    
-    LOGF(info, "Finished processing of collision %d", collision.globalIndex());
   }
   PROCESS_SWITCH(JetBackgroundAnalysisTask, processRhoPerpendicular, "QA for rho perp", false);
 
