@@ -65,8 +65,8 @@ struct RhoEstimatorTask {
     Configurable<float> trackEtaMax{"trackEtaMax", 0.9, "maximum track eta"};
     Configurable<float> trackPhiMin{"trackPhiMin", -99.0, "minimum track phi"};
     Configurable<float> trackPhiMax{"trackPhiMax", 99.0, "maximum track phi"};
-    Configurable<double> trackingEfficiencies{"trackingEfficiencies", 1.0, "tracking efficiency array applied to jet finding"};
-    Configurable<std::vector<double>> trackingEfficienciesPtBinning{"trackingEfficienciesPtBinning", {0, 999.}, "pt binning of tracking efficiency array"};
+    Configurable<double> trackingEfficiency{"trackingEfficiency", 1.0, "tracking efficiency array applied to jet finding"};
+    Configurable<std::vector<double>> trackingEfficiencyPtBinning{"trackingEfficiencyPtBinning", {0., 999.}, "pt binning of tracking efficiency array"};
     Configurable<std::string> trackSelections{"trackSelections", "globalTracks", "set track selections"};
 
     Configurable<std::string> particleSelections{"particleSelections", "PhysicalPrimary", "set particle selections"};
@@ -201,7 +201,7 @@ struct RhoEstimatorTask {
       return;
     }
     inputParticles.clear();
-    jetfindingutilities::analyseTracks<soa::Filtered<aod::JetTracks>, soa::Filtered<aod::JetTracks>::iterator>(inputParticles, tracks, trackSelection, config.trackingEfficiency, config.trackingEfficienciesPtBinning);
+    jetfindingutilities::analyseTracks<soa::Filtered<aod::JetTracks>, soa::Filtered<aod::JetTracks>::iterator>(inputParticles, tracks, trackSelection, config.trackingEfficiency, config.trackingEfficiencyPtBinning);
     auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, config.doSparse);
     rhoChargedTable(rho, rhoM);
   }
@@ -228,7 +228,7 @@ struct RhoEstimatorTask {
         continue;
       }
       inputParticles.clear();
-      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiencies, config.trackingEfficienciesPtBinning, &candidate);
+      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiency, config.trackingEfficiencyPtBinning, &candidate);
 
       auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, config.doSparse);
       rhoD0Table(rho, rhoM);
@@ -256,7 +256,7 @@ struct RhoEstimatorTask {
         continue;
       }
       inputParticles.clear();
-      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiencies, config.trackingEfficienciesPtBinning, &candidate);
+      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiency, config.trackingEfficiencyPtBinning, &candidate);
 
       auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, config.doSparse);
       rhoDplusTable(rho, rhoM);
@@ -284,7 +284,7 @@ struct RhoEstimatorTask {
         continue;
       }
       inputParticles.clear();
-      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiencies, config.trackingEfficienciesPtBinning, &candidate);
+      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiency, config.trackingEfficiencyPtBinning, &candidate);
 
       auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, config.doSparse);
       rhoLcTable(rho, rhoM);
@@ -312,7 +312,7 @@ struct RhoEstimatorTask {
         continue;
       }
       inputParticles.clear();
-      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiencies, config.trackingEfficienciesPtBinning, &candidate);
+      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiency, config.trackingEfficiencyPtBinning, &candidate);
 
       auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, config.doSparse);
       rhoBplusTable(rho, rhoM);
@@ -340,7 +340,7 @@ struct RhoEstimatorTask {
         continue;
       }
       inputParticles.clear();
-      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiencies, config.trackingEfficienciesPtBinning, &candidate);
+      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, config.trackingEfficiency, config.trackingEfficiencyPtBinning, &candidate);
 
       auto [rho, rhoM] = bkgSub.estimateRhoAreaMedian(inputParticles, config.doSparse);
       rhoDielectronTable(rho, rhoM);

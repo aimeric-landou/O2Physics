@@ -71,7 +71,7 @@ struct JetFinderHFTask {
   Configurable<float> trackPhiMin{"trackPhiMin", -999, "minimum track phi"};
   Configurable<float> trackPhiMax{"trackPhiMax", 999, "maximum track phi"};
   Configurable<double> trackingEfficiency{"trackingEfficiency", 1.0, "tracking efficiency array applied to jet finding"};
-  Configurable<std::vector<double>> trackingEfficienciesPtBinning{"trackingEfficienciesPtBinning", {0., 999.}, "pt binning of tracking efficiency array"};
+  Configurable<std::vector<double>> trackingEfficiencyPtBinning{"trackingEfficiencyPtBinning", {0., 999.}, "pt binning of tracking efficiency array"};
   Configurable<std::string> trackSelections{"trackSelections", "globalTracks", "set track selections"};
   Configurable<std::string> particleSelections{"particleSelections", "PhysicalPrimary", "set particle selections"};
 
@@ -208,9 +208,9 @@ struct JetFinderHFTask {
       }
     }
     if constexpr (isEvtWiseSub) {
-      jetfindingutilities::analyseTracks<U, typename U::iterator>(inputParticles, tracks, trackSelection, trackingEfficiency, trackingEfficienciesPtBinning);
+      jetfindingutilities::analyseTracks<U, typename U::iterator>(inputParticles, tracks, trackSelection, trackingEfficiency, trackingEfficiencyPtBinning);
     } else {
-      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, trackingEfficiency, trackingEfficienciesPtBinning, &candidate);
+      jetfindingutilities::analyseTracks(inputParticles, tracks, trackSelection, trackingEfficiency, trackingEfficiencyPtBinning, &candidate);
     }
     jetfindingutilities::findJets(jetFinder, inputParticles, minJetPt, maxJetPt, jetRadius, jetAreaFractionMin, collision, jetsTableInput, constituentsTableInput, registry.get<THn>(HIST("hJet")), fillTHnSparse, true);
   }
