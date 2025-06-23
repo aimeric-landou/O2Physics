@@ -105,8 +105,8 @@ void analyseTracks(std::vector<fastjet::PseudoJet>& inputParticles, T const& tra
     }
     if (trackingEfficiencyPtBinning.size() == 2 && trackingEfficiency.at(0) > 0.999) { // this code is a bit ugly but it stops us needing to do the random generation unless asked for
       TRandom3 randomNumber(0);
-      for(size_t i=0; i < trackingEfficiency.size(); i++){
-        if (trackingEfficiencyPtBinning.at(i) < track.pt() && track.pt() < trackingEfficiencyPtBinning.at (i+1) && randomNumber.Rndm() > trackingEfficiency.at(i)) {
+      for (size_t i = 0; i < trackingEfficiency.size(); i++) {
+        if (trackingEfficiencyPtBinning.at(i) < track.pt() && track.pt() < trackingEfficiencyPtBinning.at(i + 1) && randomNumber.Rndm() > trackingEfficiency.at(i)) {
           continue;
         }
       }
@@ -138,8 +138,8 @@ void analyseTracksMultipleCandidates(std::vector<fastjet::PseudoJet>& inputParti
     }
     if (trackingEfficiencyPtBinning.size() == 2 && trackingEfficiency.at(0) > 0.999) { // this code is a bit ugly but it stops us needing to do the random generation unless asked for
       TRandom3 randomNumber(0);
-      for(size_t i=0; i < trackingEfficiency.size(); i++){
-        if (trackingEfficiencyPtBinning.at(i) < track.pt() && track.pt() < trackingEfficiencyPtBinning.at (i+1) && randomNumber.Rndm() > trackingEfficiency.at(i)) {
+      for (size_t i = 0; i < trackingEfficiency.size(); i++) {
+        if (trackingEfficiencyPtBinning.at(i) < track.pt() && track.pt() < trackingEfficiencyPtBinning.at(i + 1) && randomNumber.Rndm() > trackingEfficiency.at(i)) {
           continue;
         }
       }
