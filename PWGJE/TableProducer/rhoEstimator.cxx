@@ -65,7 +65,7 @@ struct RhoEstimatorTask {
     Configurable<float> trackEtaMax{"trackEtaMax", 0.9, "maximum track eta"};
     Configurable<float> trackPhiMin{"trackPhiMin", -99.0, "minimum track phi"};
     Configurable<float> trackPhiMax{"trackPhiMax", 99.0, "maximum track phi"};
-    Configurable<std::vector<double>> trackingEfficiency{"trackingEfficiency", 1.0, "tracking efficiency array applied to jet finding"};
+    Configurable<std::vector<double>> trackingEfficiency{"trackingEfficiency", {1.0}, "tracking efficiency array applied to jet finding"};
     Configurable<std::vector<double>> trackingEfficiencyPtBinning{"trackingEfficiencyPtBinning", {0., 999.}, "pt binning of tracking efficiency array"};
     Configurable<std::string> trackSelections{"trackSelections", "globalTracks", "set track selections"};
 

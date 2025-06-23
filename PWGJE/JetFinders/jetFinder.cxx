@@ -72,7 +72,7 @@ struct JetFinderTask {
   Configurable<float> trackEtaMax{"trackEtaMax", 0.9, "maximum track eta"};
   Configurable<float> trackPhiMin{"trackPhiMin", -999, "minimum track phi"};
   Configurable<float> trackPhiMax{"trackPhiMax", 999, "maximum track phi"};
-  Configurable<std::vector<double>> trackingEfficiency{"trackingEfficiency", {1.0}, "tracking efficiency array"};
+  Configurable<std::vector<double>> trackingEfficiency{"trackingEfficiency", {1.0}, "tracking efficiency array applied to jet finding"};
   Configurable<std::vector<double>> trackingEfficiencyPtBinning{"trackingEfficiencyPtBinning", {0., 999.}, "pt binning of tracking efficiency array"};
   Configurable<std::string> trackSelections{"trackSelections", "globalTracks", "set track selections"};
   Configurable<std::string> particleSelections{"particleSelections", "PhysicalPrimary", "set particle selections"};
