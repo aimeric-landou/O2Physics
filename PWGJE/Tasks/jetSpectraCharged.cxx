@@ -29,6 +29,7 @@
 #include <Framework/runDataProcessing.h>
 
 #include <THn.h>
+#include <random>
 
 #include <cmath>
 #include <string>
@@ -79,6 +80,12 @@ struct JetSpectraCharged {
   Configurable<int> acceptSplitCollisions{"acceptSplitCollisions", 0, "0: only look at mcCollisions that are not split; 1: accept split mcCollisions, 2: accept split mcCollisions but only look at the first reco collision associated with it"};
   Configurable<bool> skipMBGapEvents{"skipMBGapEvents", false, "flag to choose to reject min. bias gap events; jet-level rejection can also be applied at the jet finder level for jets only, here rejection is applied for collision and track process functions for the first time, and on jets in case it was set to false at the jet finder level"};
   Configurable<bool> checkLeadConstituentPtForMcpJets{"checkLeadConstituentPtForMcpJets", false, "flag to choose whether particle level jets should have their lead track pt above leadingConstituentPtMin to be accepted; off by default, as leadingConstituentPtMin cut is only applied on MCD jets for the Pb-Pb analysis using pp MC anchored to Pb-Pb for the response matrix"};
+
+  Configurable<float> splitRespVsDataUnfoldClosureRatio{"splitRespVsDataUnfoldClosureRatio", -1, " if 0 < ratio < 1 : detector response matrix, efficiency and purity histograms are filled with ratio*100 percent of the statistics, and other histograms with the rest; only first two decimals will be seen"};
+  // List of "detector response matrix, efficiency and purity histograms" :
+  // Response matrix: h2_jet_pt_mcd_jet_pt_mcp_matchedgeo_mcpetaconstraint, h2_jet_pt_mcd_jet_pt_mcp_matchedgeo_rhoareasubtracted
+  // Efficiency h_jet_pt_part, h_jet_pt_part_rhoareasubtracted, h2_jet_pt_mcd_jet_pt_mcp_matchedgeo_mcpetaconstraint, h2_jet_pt_mcd_jet_pt_mcp_matchedgeo_rhoareasubtracted
+  // Purity: h_jet_pt, h_jet_pt_rhoareasubtracted, h2_jet_pt_mcd_jet_pt_mcp_matchedgeo_mcdetaconstraint, h2_jet_pt_mcd_jet_pt_mcp_matchedgeo_rhoareasubtracted
 
   std::vector<int> eventSelectionBits;
   int trackSelection = -1;
@@ -261,6 +268,25 @@ struct JetSpectraCharged {
   Filter trackCuts = (aod::jtrack::pt >= trackPtMin && aod::jtrack::pt < trackPtMax && aod::jtrack::eta > trackEtaMin && aod::jtrack::eta < trackEtaMax);
   Filter eventCuts = (nabs(aod::jcollision::posZ) < vertexZCut);
   Filter mcEventCuts = (nabs(aod::jmccollision::posZ) < vertexZCut);
+
+
+  template <typename TCollision>
+  bool randomTestBasedOnCollisionIndex(TCollision collision) {
+    // int seed = collision.globalIndex(); 
+    // TRandom3 randomNumber(seed);
+    // if (randomNumber.Uniform(0, 1) > splitRespVsDataUnfoldClosureRatio) {
+    //   return false;
+    // }
+    // return true;
+
+    int seed = collision.globalIndex(); // all collisions with same global index will get the same output for randomSplitDistrib()
+    std::mt19937 gen(seed);
+    std::uniform_int_distribution<int> randomSplitDistrib(0,99); // gives random int between 0 and 99 included
+    if (randomSplitDistrib(gen)/100. > splitRespVsDataUnfoldClosureRatio) {
+      return false;
+    }
+    return true;
+  }
 
   template <typename TTracks, typename TJets>
   bool isAcceptedJet(TJets const& jet, bool mcLevelIsParticleLevel = false)
@@ -721,6 +747,9 @@ struct JetSpectraCharged {
   {
     bool fillHistograms = true;
     bool isWeighted = false;
+    if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collision)) { // we want it before applyCollisionCuts so that only the collisions in the correct MC split side are recorded
+      return;
+    }
     if (!applyCollisionCuts(collision, fillHistograms, isWeighted)) {
       return;
     }
@@ -738,6 +767,9 @@ struct JetSpectraCharged {
     bool fillHistograms = true;
     bool isWeighted = true;
     float eventWeight = collision.weight();
+    if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collision)) { // we want it before applyCollisionCuts so that only the collisions in the correct MC split side are recorded
+      return;
+    }
     if (!applyCollisionCuts(collision, fillHistograms, isWeighted, eventWeight)) {
       return;
     }
@@ -754,6 +786,9 @@ struct JetSpectraCharged {
   {
     bool fillHistograms = true;
     bool isWeighted = false;
+    if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collisions.begin())) { // we want it before applyCollisionCuts so that only the collisions in the correct MC split side are recorded
+      return;
+    }
     if (!applyMCCollisionCuts(mccollision, collisions, fillHistograms, isWeighted)) {
       return;
     }
@@ -767,6 +802,9 @@ struct JetSpectraCharged {
     bool fillHistograms = true;
     bool isWeighted = true;
     float eventWeight = mccollision.weight();
+    if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collisions.begin())) { // we want it before applyCollisionCuts so that only the collisions in the correct MC split side are recorded
+      return;
+    }
     if (!applyMCCollisionCuts(mccollision, collisions, fillHistograms, isWeighted, eventWeight)) {
       return;
     }
@@ -820,6 +858,9 @@ struct JetSpectraCharged {
       if (!isAcceptedJet<aod::JetTracks>(jet)) {
         continue;
       }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collision)) {
+        return;
+      }
       fillJetHistograms(jet, centrality);
     }
   }
@@ -866,6 +907,9 @@ struct JetSpectraCharged {
       if (!isAcceptedJet<aod::JetTracks>(jet)) {
         continue;
       }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collision)) {
+        return;
+      }
       fillJetAreaSubHistograms(jet, centrality, collision.rho());
     }
   }
@@ -891,6 +935,9 @@ struct JetSpectraCharged {
       }
       if (!isAcceptedJet<aod::JetTracks>(jet)) {
         continue;
+      }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collision)) {
+        return;
       }
       float jetweight = jet.eventWeight();
       fillJetHistograms(jet, centrality, jetweight);
@@ -919,6 +966,9 @@ struct JetSpectraCharged {
       if (!isAcceptedJet<aod::JetTracks>(jet)) {
         continue;
       }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collision)) {
+        return;
+      }
       float jetweight = jet.eventWeight();
       fillJetAreaSubHistograms(jet, centrality, collision.rho(), jetweight);
     }
@@ -944,6 +994,9 @@ struct JetSpectraCharged {
       if (!isAcceptedJet<aod::JetParticles>(jet, mcLevelIsParticleLevel)) {
         continue;
       }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collisions.begin())) {
+        return;
+      }
       fillMCPHistograms(jet);
     }
   }
@@ -967,6 +1020,9 @@ struct JetSpectraCharged {
       }
       if (!isAcceptedJet<aod::JetParticles>(jet, mcLevelIsParticleLevel)) {
         continue;
+      }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collisions.begin())) {
+        return;
       }
       fillMCPAreaSubHistograms(jet, mccollision.rho());
     }
@@ -993,6 +1049,9 @@ struct JetSpectraCharged {
       }
       if (!isAcceptedJet<aod::JetParticles>(jet, mcLevelIsParticleLevel)) {
         continue;
+      }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collisions.begin())) {
+        return;
       }
       float jetweight = jet.eventWeight();
       double pTHat = 10. / (std::pow(jetweight, 1.0 / pTHatExponent));
@@ -1028,6 +1087,9 @@ struct JetSpectraCharged {
       }
       if (!isAcceptedJet<aod::JetParticles>(jet, mcLevelIsParticleLevel)) {
         continue;
+      }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collisions.begin())) {
+        return;
       }
       float jetweight = jet.eventWeight();
       fillMCPAreaSubHistograms(jet, mccollision.rho(), jetweight);
@@ -1076,6 +1138,9 @@ struct JetSpectraCharged {
       if (!isAcceptedJet<aod::JetTracksSub>(jet)) {
         continue;
       }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && !randomTestBasedOnCollisionIndex(collision)) {
+        return;
+      }
       fillEventWiseConstituentSubtractedHistograms(jet, centrality);
     }
   }
@@ -1093,6 +1158,9 @@ struct JetSpectraCharged {
     for (const auto& mcdjet : mcdjets) {
       if (!isAcceptedJet<aod::JetTracks>(mcdjet)) {
         continue;
+      }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && randomTestBasedOnCollisionIndex(collision)) {
+        return;
       }
       fillMatchedHistograms<ChargedMCDMatchedJets::iterator, ChargedMCPMatchedJets>(mcdjet);
     }
@@ -1115,6 +1183,9 @@ struct JetSpectraCharged {
       if (!isAcceptedJet<aod::JetTracks>(mcdjet)) {
         continue;
       }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && randomTestBasedOnCollisionIndex(collision)) {
+        return;
+      }
       fillMatchedHistograms<ChargedMCDMatchedJetsWeighted::iterator, ChargedMCPMatchedJetsWeighted>(mcdjet, mcdjet.eventWeight());
     }
   }
@@ -1135,6 +1206,9 @@ struct JetSpectraCharged {
     for (const auto& mcdjet : mcdjets) {
       if (!isAcceptedJet<aod::JetTracks>(mcdjet)) {
         continue;
+      }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && randomTestBasedOnCollisionIndex(collision)) {
+        return;
       }
       fillGeoMatchedAreaSubHistograms<ChargedMCDMatchedJets::iterator, ChargedMCPMatchedJets>(mcdjet, collision.rho(), mcrho);
     }
@@ -1159,6 +1233,9 @@ struct JetSpectraCharged {
     for (const auto& mcdjet : mcdjets) {
       if (!isAcceptedJet<aod::JetTracks>(mcdjet)) {
         continue;
+      }
+      if (splitRespVsDataUnfoldClosureRatio > 0 && randomTestBasedOnCollisionIndex(collision)) {
+        return;
       }
       fillGeoMatchedAreaSubHistograms<ChargedMCDMatchedJetsWeighted::iterator, ChargedMCPMatchedJetsWeighted>(mcdjet, collision.rho(), mcrho, eventWeight);
     }
