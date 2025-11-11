@@ -328,8 +328,11 @@ struct JetSpectraCharged {
   template <typename TMCColl, typename TCollisions>
   bool applyMCCollisionCuts(TMCColl const& mccollision, TCollisions const& collisions, bool fillHistograms = false, bool isWeighted = false, float eventWeight = 1.0)
   {
+    // applies mc collision cuts, and fills histograms that count mc collisions if fillHistograms is set to true
+
     float centrality = -1.0;
-    checkCentFT0M ? centrality = mccollision.centFT0M() : centrality = mccollision.centFT0C();
+    // checkCentFT0M ? centrality = mccollision.centFT0M() : centrality = mccollision.centFT0C();
+    checkCentFT0M ? centrality = mccollision.centFT0M() : (collisions.size() > 0 ?  collisions.begin().centFT0C() : -1); // once we have mccollisoin.centFT0C we can clean this up
 
     if (fillHistograms) {
       registry.fill(HIST("h_mccollisions"), 0.5);
@@ -381,9 +384,9 @@ struct JetSpectraCharged {
           occupancyIsGood = true;
         }
 
-        float centrality = -1.0;
-        checkCentFT0M ? centrality = collision.centFT0M() : centrality = collision.centFT0C();
-        if ((centralityMin < centrality) && (centrality < centralityMax)) {
+        int currentCollCentrality = -1;
+        checkCentFT0M ? currentCollCentrality = collision.centFT0M() : currentCollCentrality = collision.centFT0C();
+        if ((centralityMin < currentCollCentrality) && (currentCollCentrality < centralityMax)) {
           centralityIsGood = true;
         }
       }
@@ -425,6 +428,8 @@ struct JetSpectraCharged {
   template <typename TColl>
   bool applyCollisionCuts(TColl const& collision, bool fillHistograms = false, bool isWeighted = false, float eventWeight = 1.0)
   {
+    // applies collision cuts, and fills histograms that count collisions if fillHistograms is set to true
+
     float centrality = -1.0;
     checkCentFT0M ? centrality = collision.centFT0M() : centrality = collision.centFT0C();
 
