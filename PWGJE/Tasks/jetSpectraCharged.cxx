@@ -29,9 +29,9 @@
 #include <Framework/runDataProcessing.h>
 
 #include <THn.h>
-#include <random>
 
 #include <cmath>
+#include <random>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -269,10 +269,10 @@ struct JetSpectraCharged {
   Filter eventCuts = (nabs(aod::jcollision::posZ) < vertexZCut);
   Filter mcEventCuts = (nabs(aod::jmccollision::posZ) < vertexZCut);
 
-
   template <typename TCollision>
-  bool randomTestBasedOnCollisionIndex(TCollision collision) {
-    // int seed = collision.globalIndex(); 
+  bool randomTestBasedOnCollisionIndex(TCollision collision)
+  {
+    // int seed = collision.globalIndex();
     // TRandom3 randomNumber(seed);
     // if (randomNumber.Uniform(0, 1) > splitRespVsDataUnfoldClosureRatio) {
     //   return false;
@@ -281,8 +281,8 @@ struct JetSpectraCharged {
 
     int seed = collision.globalIndex(); // all collisions with same global index will get the same output for randomSplitDistrib()
     std::mt19937 gen(seed);
-    std::uniform_int_distribution<int> randomSplitDistrib(0,99); // gives random int between 0 and 99 included
-    if (randomSplitDistrib(gen)/100. > splitRespVsDataUnfoldClosureRatio) {
+    std::uniform_int_distribution<int> randomSplitDistrib(0, 99); // gives random int between 0 and 99 included
+    if (randomSplitDistrib(gen) / 100. > splitRespVsDataUnfoldClosureRatio) {
       return false;
     }
     return true;
@@ -332,7 +332,7 @@ struct JetSpectraCharged {
 
     float centrality = -1.0;
     // checkCentFT0M ? centrality = mccollision.centFT0M() : centrality = mccollision.centFT0C();
-    checkCentFT0M ? centrality = mccollision.centFT0M() : (collisions.size() > 0 ?  collisions.begin().centFT0C() : -1); // once we have mccollisoin.centFT0C we can clean this up
+    checkCentFT0M ? centrality = mccollision.centFT0M() : (collisions.size() > 0 ? collisions.begin().centFT0C() : -1); // once we have mccollisoin.centFT0C we can clean this up
 
     if (fillHistograms) {
       registry.fill(HIST("h_mccollisions"), 0.5);
