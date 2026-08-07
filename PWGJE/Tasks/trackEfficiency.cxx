@@ -35,6 +35,8 @@
 
 #include <TH1.h>
 
+#include <RtypesCore.h>
+
 #include <algorithm>
 #include <cmath>
 #include <string>
@@ -106,7 +108,7 @@ struct TrackEfficiency {
 
   std::vector<int> eventSelectionBits;
   int trackSelection = -1;
-  float pTHatSettingSentinelValue = 999.0;
+  int pTHatSettingSentinelValue = 999;
 
   enum AcceptSplitCollisionsOptions {
     NonSplitOnly = 0,
@@ -123,7 +125,9 @@ struct TrackEfficiency {
       }
     } else {
       const auto& aodTrack = jetTrack.template track_as<soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksDCA>>();
-      if (effSystMinNCrossedRowsTPCUseAlternateCut && (aodTrack.tpcNClsCrossedRows() < 120 - 5. / aodTrack.pt())) {
+      int nRowsTPC = 120;
+      int nCrossedRowsVariableCutFactor = 5; // nRowsTPC and nCrossedRowsVariableCutFactor values taken from https://twiki.cern.ch/twiki/bin/viewauth/ALICE/AliDPGtoolsTrackSystematicUncertainty?extralog=-%20caching%20topic
+      if (effSystMinNCrossedRowsTPCUseAlternateCut && (aodTrack.tpcNClsCrossedRows() < nRowsTPC - nCrossedRowsVariableCutFactor / aodTrack.pt())) {
         return false;
       }
       if (customTrackSelection.IsSelected(aodTrack)) {
